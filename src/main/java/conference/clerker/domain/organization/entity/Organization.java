@@ -4,14 +4,12 @@ package conference.clerker.domain.organization.entity;
 import conference.clerker.domain.member.entity.Member;
 import conference.clerker.domain.project.entity.Project;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
-@Getter @Builder
-@NoArgsConstructor
+@Getter @Setter
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Organization {
 
@@ -37,15 +35,15 @@ public class Organization {
     @Column(name = "phone_number")
     private String phoneNumber;
 
-    public Organization createMember(Member member, Project project) {
-        return Organization.builder()
+    public static Organization createMember(Member member, Project project) {
+        return conference.clerker.domain.organization.entity.Organization.builder()
                 .role(Role.MEMBER)
                 .member(member)
                 .project(project)
                 .build();
     }
 
-    public Organization createOwner(Member member, Project project) {
+    public static Organization createOwner(Member member, Project project) {
         return Organization.builder()
                 .role(Role.OWNER)
                 .member(member)

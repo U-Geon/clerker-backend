@@ -1,6 +1,5 @@
 package conference.clerker.domain.member.entity;
 
-import conference.clerker.domain.organization.entity.Role;
 import jakarta.persistence.*;
 import lombok.*;
 

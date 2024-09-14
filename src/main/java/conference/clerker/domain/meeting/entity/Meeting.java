@@ -34,9 +34,12 @@ public class Meeting {
     @JoinColumn(name = "project_id")
     private Project project;
 
-    public static Meeting create(Project project) {
+    public static Meeting create(Project project, String name, LocalDateTime startDate, Boolean isEnded) {
         return Meeting.builder()
+                .name(name)
                 .project(project)
+                .startDate(startDate)
+                .isEnded(isEnded)
                 .build();
     }
 }

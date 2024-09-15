@@ -24,7 +24,7 @@ jobs:
           cd ./src/main/resources
           
           touch ./application-db.yml
-          touch ./application-awsyml
+          touch ./application-aws.yml
           touch ./application-jwt.yml
           touch ./application-swagger.yml
           

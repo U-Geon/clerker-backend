@@ -23,11 +23,11 @@ jobs:
         run: |
           cd ./src/main/resources
           
-          # 디버깅 로그 추가
-          echo "APPLICATION_DB: ${APPLICATION_DB}"
-          echo "APPLICATION_AWS: ${APPLICATION_AWS}"
-          echo "APPLICATION_JWT: ${APPLICATION_JWT}"
-          echo "APPLICATION_SWAGGER: ${APPLICATION_SWAGGER}"
+          #디버깅
+          echo "APPLICATION_DB: ${{ secrets.APPLICATION_DB }}"
+          echo "APPLICATION_AWS: ${{ secrets.APPLICATION_AWS }}"
+          echo "APPLICATION_JWT: ${{ secrets.APPLICATION_JWT }}"
+          echo "APPLICATION_SWAGGER: ${{ secrets.APPLICATION_SWAGGER }}"
 
           # 각각의 시크릿을 개별 파일로 저장
           echo "${{ secrets.APPLICATION_DB }}" > application-db.yml

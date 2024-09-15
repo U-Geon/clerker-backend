@@ -19,8 +19,7 @@ public class Project {
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Column(name = "parent_project")
-    @JoinColumn(name = "project_id")
+    @JoinColumn(name = "parent_id")
     private Project parentProject;
 
     public static Project create() {

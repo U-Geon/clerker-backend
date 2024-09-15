@@ -3,13 +3,14 @@ package conference.clerker.domain.meeting.entity;
 import conference.clerker.domain.project.entity.Project;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter @Setter
 @Builder
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Meeting {
 
@@ -23,12 +24,22 @@ public class Meeting {
     @Column(nullable = false, updatable = false)
     private LocalDateTime startDate;
 
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime endDate;
-
     private Boolean isEnded;
+
+    @CreatedDate
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id")
     private Project project;
+
+    public static Meeting create(Project project, String name, LocalDateTime startDate, Boolean isEnded) {
+        return Meeting.builder()
+                .name(name)
+                .project(project)
+                .startDate(startDate)
+                .isEnded(isEnded)
+                .build();
+    }
 }

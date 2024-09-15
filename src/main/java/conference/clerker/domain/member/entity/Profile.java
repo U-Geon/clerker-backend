@@ -1,13 +1,12 @@
 package conference.clerker.domain.member.entity;
 
-import conference.clerker.domain.project.entity.Project;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
 @Getter @Setter
 @Builder
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Profile {
 
@@ -24,4 +23,12 @@ public class Profile {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
+
+    public static Profile create(Member member, String url, String filename) {
+        return Profile.builder()
+                .member(member)
+                .url(url)
+                .filename(filename)
+                .build();
+    }
 }

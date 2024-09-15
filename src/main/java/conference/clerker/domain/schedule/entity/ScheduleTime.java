@@ -1,6 +1,5 @@
 package conference.clerker.domain.schedule.entity;
 
-import conference.clerker.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,7 +8,7 @@ import java.util.List;
 @Entity
 @Getter @Setter
 @Builder
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class ScheduleTime {
 
@@ -25,7 +24,14 @@ public class ScheduleTime {
     @JoinColumn(name = "schedule_id")
     private Schedule schedule;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
+    // FK처럼 쓰지말고 member id만 담아두면 될듯
+    private Long memberId;
+
+    public static ScheduleTime create(List<String> timeTable, Schedule schedule, Long memberId) {
+        return ScheduleTime.builder()
+                .timeTable(timeTable)
+                .schedule(schedule)
+                .memberId(memberId)
+                .build();
+    }
 }

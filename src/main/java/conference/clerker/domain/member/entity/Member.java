@@ -1,13 +1,12 @@
 package conference.clerker.domain.member.entity;
 
-import conference.clerker.domain.organization.entity.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
 @Getter @Setter
 @Builder
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Member {
 

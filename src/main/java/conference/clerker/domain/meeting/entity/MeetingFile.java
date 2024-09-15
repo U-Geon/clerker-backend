@@ -6,7 +6,7 @@ import lombok.*;
 @Entity
 @Getter @Setter
 @Builder
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class MeetingFile {
 
@@ -23,4 +23,10 @@ public class MeetingFile {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "meeting_id")
     private Meeting meeting;
+
+    public static MeetingFile create(Meeting meeting) {
+        return MeetingFile.builder()
+                .meeting(meeting)
+                .build();
+    }
 }

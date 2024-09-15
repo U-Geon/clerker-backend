@@ -28,8 +28,6 @@ jobs:
           touch ./application-jwt.yml
           touch ./application-swagger.yml
           
-          #디버깅
-
           # 각각의 시크릿을 개별 파일로 저장
           echo "${{ secrets.APPLICATION_DB }}" > application-db.yml
           echo "${{ secrets.APPLICATION_AWS }}" > application-aws.yml

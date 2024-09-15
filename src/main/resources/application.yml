@@ -2,7 +2,7 @@ spring:
   config:
     import:
       - application-db.yml
-      - application-aws.yml
       - application-jwt.yml
       - application-swagger.yml
+#      - application-aws.yml
 #      - application-oauth.yml

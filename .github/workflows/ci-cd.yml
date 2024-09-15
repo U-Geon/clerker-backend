@@ -29,10 +29,10 @@ jobs:
           touch ./application-swagger.yml
           
           # 각각의 시크릿을 개별 파일로 저장
-          echo "${{ secrets.APPLICATION_DB }}" > application-db.yml
-          echo "${{ secrets.APPLICATION_AWS }}" > application-aws.yml
-          echo "${{ secrets.APPLICATION_JWT }}" > application-jwt.yml
-          echo "${{ secrets.APPLICATION_SWAGGER }}" > application-swagger.yml
+          echo "${{ secrets.APPLICATION_DB }}" >> application-db.yml
+          echo "${{ secrets.APPLICATION_AWS }}" >> application-aws.yml
+          echo "${{ secrets.APPLICATION_JWT }}" >> application-jwt.yml
+          echo "${{ secrets.APPLICATION_SWAGGER }}" >> application-swagger.yml
 
         shell: bash
 

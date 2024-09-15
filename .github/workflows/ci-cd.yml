@@ -23,17 +23,11 @@ jobs:
         run: |
           cd ./src/main/resources
 
-          # 통합된 설정 파일 내용을 가져와서 분리
-          echo "${{ secrets.APPLICATION_YML }}" > all-configs.yml
-
-          # 각 파일로 나누어 작성
-          csplit -z -f application- all-configs.yml '/# application-/' '{*}'
-
-          # 파일 이름을 올바르게 변경
-          mv application-01 application-db.yml
-          mv application-02 application-aws.yml
-          mv application-03 application-jwt.yml
-          mv application-04 application-swagger.yml
+          # 각각의 시크릿을 개별 파일로 저장
+          echo "${{ secrets.APPLICATION_DB }}" > application-db.yml
+          echo "${{ secrets.APPLICATION_AWS }}" > application-aws.yml
+          echo "${{ secrets.APPLICATION_JWT }}" > application-jwt.yml
+          echo "${{ secrets.APPLICATION_SWAGGER }}" > application-swagger.yml
 
         shell: bash
 

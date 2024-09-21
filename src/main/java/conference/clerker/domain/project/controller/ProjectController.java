@@ -1,11 +1,11 @@
 package conference.clerker.domain.project.controller;
 
 
-import conference.clerker.domain.member.entity.Member;
-import conference.clerker.domain.organization.dtos.ProjectInfoDTO;
+import conference.clerker.domain.member.schema.Member;
+import conference.clerker.domain.organization.dto.ProjectInfoDTO;
 import conference.clerker.domain.organization.service.OrganizationService;
-import conference.clerker.domain.project.dtos.request.InviteMembersRequestDTO;
-import conference.clerker.domain.project.dtos.request.UpdateProjectRequestDTO;
+import conference.clerker.domain.project.dto.request.InviteMembersRequestDTO;
+import conference.clerker.domain.project.dto.request.UpdateProjectRequestDTO;
 import conference.clerker.domain.project.entity.Project;
 import conference.clerker.domain.project.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -103,7 +103,7 @@ public class ProjectController {
 
     // 프로젝트 이름 및 멤버 정보 수정
     @PatchMapping("/{projectID}")
-    @Operation(summary = "프로젝트명 수정", description = "프로젝트명 수정하는 API")
+    @Operation(summary = "프로젝트명 수정", description = "프로젝트명 수정 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "PROJECT-001", description = "프로젝트를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
@@ -129,13 +129,13 @@ public class ProjectController {
             @RequestBody InviteMembersRequestDTO inviteMembersRequestDTO,
             @Parameter(required = true, description = "프로젝트 Id" ,in = ParameterIn.PATH)
             @PathVariable("projectID") Long projectId) {
-        organizationService.inviteMember(inviteMembersRequestDTO.getEmails(), projectId);
+        organizationService.inviteMember(inviteMembersRequestDTO.emails(), projectId);
         return ResponseEntity.ok().body("{\"msg\" : \"success\"}");
     }
 
     // 프로젝트 나가기
     @DeleteMapping("/out/{projectID}")
-    @Operation(summary = "프로젝트 나가기", description = "토큰 필요")
+    @Operation(summary = "프로젝트 나가기", description = "방장만 내보낼 수 있음.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "성공", content = @Content(mediaType = "application/json")),
     })
@@ -144,7 +144,7 @@ public class ProjectController {
             @Parameter(required = true, description = "프로젝트 Id" ,in = ParameterIn.PATH)
             @PathVariable("projectID") Long projectId) {
         organizationService.outOfProject(member.getId(), projectId);
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.noContent().build();
     }
 
 }

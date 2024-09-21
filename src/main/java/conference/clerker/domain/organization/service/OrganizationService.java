@@ -1,13 +1,14 @@
 package conference.clerker.domain.organization.service;
 
 
-import conference.clerker.domain.member.entity.Member;
+import conference.clerker.domain.member.schema.Member;
 import conference.clerker.domain.member.repository.MemberRepository;
-import conference.clerker.domain.organization.dtos.MemberInfoDTO;
-import conference.clerker.domain.organization.dtos.ProjectInfoDTO;
+import conference.clerker.domain.organization.dto.MemberInfoDTO;
+import conference.clerker.domain.organization.dto.ProjectInfoDTO;
 import conference.clerker.domain.organization.entity.Organization;
+import conference.clerker.domain.organization.entity.Role;
 import conference.clerker.domain.organization.repository.OrganizationRepository;
-import conference.clerker.domain.project.dtos.request.UpdateProjectRequestDTO;
+import conference.clerker.domain.project.dto.request.UpdateProjectRequestDTO;
 import conference.clerker.domain.project.entity.Project;
 import conference.clerker.domain.project.repository.ProjectRepository;
 import conference.clerker.global.exception.ErrorCode;
@@ -54,11 +55,16 @@ public class OrganizationService {
         return organizationRepository.findProjectsByMemberId(memberId);
     }
 
-    // 프로젝트 상세 정보
+    // 프로젝트 이름 + 소속 멤버들 정보
     public ProjectInfoDTO findProject(Long projectId) {
         Project project = projectRepository.findById(projectId).orElseThrow(() -> new ProjectException(ErrorCode.PROJECT_NOT_FOUND));
         List<MemberInfoDTO> membersByProjectId = organizationRepository.findMemberInfosByProjectId(projectId);
         return new ProjectInfoDTO(project.getName(), membersByProjectId);
+    }
+
+    // 프로젝트 내 멤버들 조회
+    public List<Member> findMembersByProjectId(Long projectId) {
+        return organizationRepository.findMembersByProjectId(projectId);
     }
 
     // 프로젝트 내 멤버들 삭제
@@ -75,11 +81,11 @@ public class OrganizationService {
     // 멤버들 정보 수정
     @Transactional
     public void updateMembers(UpdateProjectRequestDTO requestDTO) {
-        requestDTO.getMembers().forEach(member -> {
-            Organization organization = organizationRepository.findById(member.getOrganizationId()).orElseThrow(IllegalArgumentException::new);
-            organization.setPhoneNumber(member.getPhoneNumber());
-            organization.setRole(member.getRole());
-            organization.setType(member.getType());
+        requestDTO.members().forEach(member -> {
+            Organization organization = organizationRepository.findById(member.organizationId()).orElseThrow(IllegalArgumentException::new);
+            organization.setPhoneNumber(member.phoneNumber());
+            organization.setRole(member.role());
+            organization.setType(member.type());
         });
     }
 
@@ -87,6 +93,9 @@ public class OrganizationService {
     @Transactional
     public void outOfProject(Long memberId, Long projectId) {
         Organization organization = organizationRepository.findByMemberIdAndProjectId(memberId, projectId).orElseThrow(IllegalArgumentException::new);
-        organizationRepository.deleteById(organization.getId());
+        if(organization.getRole() == Role.OWNER) {
+            organizationRepository.deleteById(organization.getId());
+        }
+        else throw new IllegalArgumentException("You're Not OWNER.");
     }
 }

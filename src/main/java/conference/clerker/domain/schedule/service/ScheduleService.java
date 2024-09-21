@@ -1,12 +1,11 @@
 package conference.clerker.domain.schedule.service;
 
-import conference.clerker.domain.member.entity.Member;
+import conference.clerker.domain.member.schema.Member;
 import conference.clerker.domain.member.repository.MemberRepository;
 import conference.clerker.domain.project.entity.Project;
 import conference.clerker.domain.project.repository.ProjectRepository;
-import conference.clerker.domain.schedule.dtos.request.CreateScheduleRequestDTO;
-import conference.clerker.domain.schedule.dtos.response.FindSchedulesDTO;
-import conference.clerker.domain.schedule.dtos.request.JoinScheduleRequestDTO;
+import conference.clerker.domain.schedule.dto.request.CreateScheduleRequestDTO;
+import conference.clerker.domain.schedule.dto.response.FindSchedulesDTO;
 import conference.clerker.domain.schedule.entity.Schedule;
 import conference.clerker.domain.schedule.repository.ScheduleRepository;
 import conference.clerker.global.exception.ErrorCode;
@@ -40,11 +39,4 @@ public class ScheduleService {
     public List<FindSchedulesDTO> findByProjectId(Long projectId) {
         return scheduleRepository.findByProjectId(projectId).stream().map(FindSchedulesDTO::new).toList();
     }
-
-    // 스케쥴 참여
-    @Transactional
-    public void participate(Long projectId, Long memberId, JoinScheduleRequestDTO requestDTO) {
-
-    }
-
 }

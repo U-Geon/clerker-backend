@@ -43,4 +43,9 @@ public class NotificationService {
         return notificationRepository.findByMember(member)
                 .stream().map(NotificationsResponseDTO::new).toList();
     }
+
+    @Transactional
+    public void delete(Long notificationId) {
+        notificationRepository.deleteById(notificationId);
+    }
 }

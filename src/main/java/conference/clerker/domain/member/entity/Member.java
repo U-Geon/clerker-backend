@@ -26,4 +26,6 @@ public class Member {
                 .username(username)
                 .build();
     }
+
+
 }

@@ -1,13 +1,13 @@
 package conference.clerker.domain.organization.service;
 
 
-import conference.clerker.domain.member.entity.Member;
+import conference.clerker.domain.member.schema.Member;
 import conference.clerker.domain.member.repository.MemberRepository;
-import conference.clerker.domain.organization.dtos.MemberInfoDTO;
-import conference.clerker.domain.organization.dtos.ProjectInfoDTO;
+import conference.clerker.domain.organization.dto.MemberInfoDTO;
+import conference.clerker.domain.organization.dto.ProjectInfoDTO;
 import conference.clerker.domain.organization.entity.Organization;
 import conference.clerker.domain.organization.repository.OrganizationRepository;
-import conference.clerker.domain.project.dtos.request.UpdateProjectRequestDTO;
+import conference.clerker.domain.project.dto.request.UpdateProjectRequestDTO;
 import conference.clerker.domain.project.entity.Project;
 import conference.clerker.domain.project.repository.ProjectRepository;
 import conference.clerker.global.exception.ErrorCode;
@@ -75,11 +75,11 @@ public class OrganizationService {
     // 멤버들 정보 수정
     @Transactional
     public void updateMembers(UpdateProjectRequestDTO requestDTO) {
-        requestDTO.getMembers().forEach(member -> {
-            Organization organization = organizationRepository.findById(member.getOrganizationId()).orElseThrow(IllegalArgumentException::new);
-            organization.setPhoneNumber(member.getPhoneNumber());
-            organization.setRole(member.getRole());
-            organization.setType(member.getType());
+        requestDTO.members().forEach(member -> {
+            Organization organization = organizationRepository.findById(member.organizationId()).orElseThrow(IllegalArgumentException::new);
+            organization.setPhoneNumber(member.phoneNumber());
+            organization.setRole(member.role());
+            organization.setType(member.type());
         });
     }
 

@@ -1,11 +1,11 @@
 package conference.clerker.domain.project.controller;
 
 
-import conference.clerker.domain.member.entity.Member;
-import conference.clerker.domain.organization.dtos.ProjectInfoDTO;
+import conference.clerker.domain.member.schema.Member;
+import conference.clerker.domain.organization.dto.ProjectInfoDTO;
 import conference.clerker.domain.organization.service.OrganizationService;
-import conference.clerker.domain.project.dtos.request.InviteMembersRequestDTO;
-import conference.clerker.domain.project.dtos.request.UpdateProjectRequestDTO;
+import conference.clerker.domain.project.dto.request.InviteMembersRequestDTO;
+import conference.clerker.domain.project.dto.request.UpdateProjectRequestDTO;
 import conference.clerker.domain.project.entity.Project;
 import conference.clerker.domain.project.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -129,7 +129,7 @@ public class ProjectController {
             @RequestBody InviteMembersRequestDTO inviteMembersRequestDTO,
             @Parameter(required = true, description = "프로젝트 Id" ,in = ParameterIn.PATH)
             @PathVariable("projectID") Long projectId) {
-        organizationService.inviteMember(inviteMembersRequestDTO.getEmails(), projectId);
+        organizationService.inviteMember(inviteMembersRequestDTO.emails(), projectId);
         return ResponseEntity.ok().body("{\"msg\" : \"success\"}");
     }
 

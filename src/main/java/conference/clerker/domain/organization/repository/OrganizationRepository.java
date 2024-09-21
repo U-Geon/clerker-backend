@@ -1,6 +1,6 @@
 package conference.clerker.domain.organization.repository;
 
-import conference.clerker.domain.organization.dtos.MemberInfoDTO;
+import conference.clerker.domain.organization.dto.MemberInfoDTO;
 import conference.clerker.domain.organization.entity.Organization;
 import conference.clerker.domain.project.entity.Project;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,6 +1,6 @@
 package conference.clerker.domain.notification.entity;
 
-import conference.clerker.domain.member.entity.Member;
+import conference.clerker.domain.member.schema.Member;
 import conference.clerker.domain.project.entity.Project;
 import jakarta.persistence.*;
 import lombok.*;

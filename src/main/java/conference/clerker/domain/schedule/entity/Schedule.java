@@ -1,8 +1,8 @@
 package conference.clerker.domain.schedule.entity;
 
-import conference.clerker.domain.member.entity.Member;
+import conference.clerker.domain.member.schema.Member;
 import conference.clerker.domain.project.entity.Project;
-import conference.clerker.domain.schedule.dtos.request.CreateScheduleRequestDTO;
+import conference.clerker.domain.schedule.dto.request.CreateScheduleRequestDTO;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -58,11 +58,11 @@ public class Schedule {
         return Schedule.builder()
                 .project(project)
                 .member(member)
-                .startDate(requestDTO.getStartDate())
-                .endDate(requestDTO.getEndDate())
-                .startTime(requestDTO.getStartTime())
-                .endTime(requestDTO.getEndTime())
-                .name(requestDTO.getName())
+                .startDate(requestDTO.startDate())
+                .endDate(requestDTO.endDate())
+                .startTime(requestDTO.startTime())
+                .endTime(requestDTO.endTime())
+                .name(requestDTO.name())
                 .build();
     }
 

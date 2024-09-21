@@ -1,8 +1,8 @@
 package conference.clerker.domain.notification.service;
 
-import conference.clerker.domain.member.entity.Member;
+import conference.clerker.domain.member.schema.Member;
 import conference.clerker.domain.member.repository.MemberRepository;
-import conference.clerker.domain.notification.dtos.response.NotificationsResponseDTO;
+import conference.clerker.domain.notification.dto.response.NotificationsResponseDTO;
 import conference.clerker.domain.notification.entity.Notification;
 import conference.clerker.domain.notification.repository.NotificationRepository;
 import conference.clerker.domain.project.entity.Project;

@@ -16,6 +16,9 @@ import conference.clerker.domain.schedule.service.ScheduleTimeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -32,10 +35,14 @@ public class ScheduleController {
     private final MeetingService meetingService;
     private final ScheduleTimeService scheduleTimeService;
     private final NotificationService notificationService;
-    private final OrganizationService organizationService;
 
     @PostMapping("/create/{projectID}")
-    @Operation(summary = "스케쥴 생성 API", description = "스케쥴 생성 API")
+    @Operation(summary = "스케쥴 생성 API", description = "스케쥴 생성")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "성공", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "PROJECT-001", description = "프로젝트를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "AUTH-001", description = "사용자를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
+    })
     public ResponseEntity<Void> createSchedule(
             @AuthenticationPrincipal Member member,
             @Parameter(required = true, description = "프로젝트 ID", in = ParameterIn.PATH)
@@ -55,6 +62,9 @@ public class ScheduleController {
 
     @GetMapping("/{projectID}")
     @Operation(summary = "프로젝트 캘린더 목록 API", description = "특정 프로젝트의 Meeting 및 Schedule 목록")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공", content = @Content(mediaType = "application/json")),
+    })
     public ResponseEntity<SchedulesAndMeetingsListResponseDTO> findAllSchedules(
             @Parameter(required = true, description = "프로젝트 ID", in = ParameterIn.PATH)
             @PathVariable("projectID") Long projectId) {
@@ -65,6 +75,10 @@ public class ScheduleController {
 
     @PostMapping("/{scheduleID}")
     @Operation(summary = "개인별 스케쥴 참여 API", description = "시간표 드래그 후 입력 시 요청, 30분 단위로 보내주세용")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "성공", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "SCHEDULE-001", description = "일정을 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
+    })
     public ResponseEntity<Void> joinSchedule(
             @Parameter(required = true, description = "스케쥴 ID", in = ParameterIn.PATH)
             @PathVariable("scheduleID") Long scheduleId,
@@ -77,6 +91,9 @@ public class ScheduleController {
 
     @GetMapping("/detail/{projectID}/{scheduleID}")
     @Operation(summary = "스케쥴 상세 조회 API", description = "개인별 입력한 스케쥴 시간 List + 참여한 인원 List 조회")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공", content = @Content(mediaType = "application/json")),
+    })
     public ResponseEntity<List<ScheduleTimeWithMemberInfoDTO>> detailSchedule(
             @Parameter(required = true, description = "프로젝트 ID", in = ParameterIn.PATH)
             @PathVariable("projectID") Long projectId,

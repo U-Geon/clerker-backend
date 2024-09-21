@@ -1,7 +1,7 @@
 package conference.clerker.domain.meeting.service;
 
 
-import conference.clerker.domain.meeting.dtos.response.FindMeetingsDTO;
+import conference.clerker.domain.meeting.dto.response.FindMeetingsDTO;
 import conference.clerker.domain.meeting.repository.MeetingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

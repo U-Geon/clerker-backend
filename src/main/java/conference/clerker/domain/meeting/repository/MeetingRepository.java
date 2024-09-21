@@ -1,6 +1,6 @@
 package conference.clerker.domain.meeting.repository;
 
-import conference.clerker.domain.meeting.entity.Meeting;
+import conference.clerker.domain.meeting.schema.Meeting;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

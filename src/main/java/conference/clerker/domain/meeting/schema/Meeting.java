@@ -1,4 +1,4 @@
-package conference.clerker.domain.meeting.entity;
+package conference.clerker.domain.meeting.schema;
 
 import conference.clerker.domain.project.entity.Project;
 import jakarta.persistence.*;

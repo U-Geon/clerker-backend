@@ -1,6 +1,6 @@
 package conference.clerker.domain.project.service;
 
-import conference.clerker.domain.project.dtos.request.UpdateProjectRequestDTO;
+import conference.clerker.domain.project.dto.request.UpdateProjectRequestDTO;
 import conference.clerker.domain.project.entity.Project;
 import conference.clerker.domain.project.repository.ProjectRepository;
 import conference.clerker.global.exception.ErrorCode;
@@ -48,6 +48,6 @@ public class ProjectService {
     @Transactional
     public void update(Long projectId, UpdateProjectRequestDTO requestDTO) {
         Project project = projectRepository.findById(projectId).orElseThrow(() -> new ProjectException(ErrorCode.PROJECT_NOT_FOUND));
-        project.setName(requestDTO.getProjectName());
+        project.setName(requestDTO.projectName());
     }
 }

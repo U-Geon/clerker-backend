@@ -1,7 +1,7 @@
 package conference.clerker.domain.schedule.service;
 
 
-import conference.clerker.domain.schedule.dtos.response.ScheduleTimeWithMemberInfoDTO;
+import conference.clerker.domain.schedule.dto.response.ScheduleTimeWithMemberInfoDTO;
 import conference.clerker.domain.schedule.entity.Schedule;
 import conference.clerker.domain.schedule.entity.ScheduleTime;
 import conference.clerker.domain.schedule.repository.ScheduleRepository;
@@ -31,9 +31,7 @@ public class ScheduleTimeService {
     }
 
     // 해당 스케쥴 상세 조회
-//    public void findTimeTableAndMemberInfoInSchedule(Long scheduleId, Long projectId) {
-//        return scheduleTimeRepository.findScheduleTimeWithMemberInfoByScheduleIdAndProjectId(scheduleId, projectId)
-//                .stream().map(ScheduleTimeWithMemberInfoDTO::new);
-//    }
-
+    public List<ScheduleTimeWithMemberInfoDTO> findScheduleTimeAndMemberInfo(Long scheduleId, Long projectId) {
+        return scheduleTimeRepository.findScheduleTimeWithMemberInfoByScheduleIdAndProjectId(scheduleId, projectId);
+    }
 }

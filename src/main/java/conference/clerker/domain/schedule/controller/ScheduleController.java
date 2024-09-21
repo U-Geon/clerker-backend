@@ -5,6 +5,7 @@ import conference.clerker.domain.meeting.dto.response.FindMeetingsDTO;
 import conference.clerker.domain.meeting.service.MeetingService;
 import conference.clerker.domain.member.schema.Member;
 import conference.clerker.domain.notification.service.NotificationService;
+import conference.clerker.domain.organization.dto.ProjectInfoDTO;
 import conference.clerker.domain.organization.service.OrganizationService;
 import conference.clerker.domain.schedule.dto.request.CreateScheduleRequestDTO;
 import conference.clerker.domain.schedule.dto.response.FindSchedulesDTO;
@@ -35,9 +36,10 @@ public class ScheduleController {
     private final MeetingService meetingService;
     private final ScheduleTimeService scheduleTimeService;
     private final NotificationService notificationService;
+    private final OrganizationService organizationService;
 
     @PostMapping("/create/{projectID}")
-    @Operation(summary = "스케쥴 생성 API", description = "스케쥴 생성")
+    @Operation(summary = "스케쥴 생성 API", description = "스케쥴 생성 + 알림 생성 체크 시 프로젝트 내 멤버들에게 알림 생성")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "성공", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "PROJECT-001", description = "프로젝트를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
@@ -50,12 +52,16 @@ public class ScheduleController {
             @RequestBody CreateScheduleRequestDTO requestDTO) {
         scheduleService.create(projectId, member.getId(), requestDTO);
         if (requestDTO.isNotify()) {
-            notificationService.notify(member.getId(),
-                    projectId,
-                    requestDTO.name(),
-                    requestDTO.startDate(),
-                    requestDTO.endDate(),
-                    "회의 스케쥴 조율");
+            organizationService.findMembersByProjectId(projectId).forEach(
+                    target ->  {
+                        notificationService.notify(target.getId(),
+                                projectId,
+                                requestDTO.name(),
+                                requestDTO.startDate(),
+                                requestDTO.endDate(),
+                                "회의 스케쥴");
+                    }
+            );
         }
         return ResponseEntity.noContent().build();
     }

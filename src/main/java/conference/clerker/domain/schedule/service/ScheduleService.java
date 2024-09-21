@@ -6,7 +6,6 @@ import conference.clerker.domain.project.entity.Project;
 import conference.clerker.domain.project.repository.ProjectRepository;
 import conference.clerker.domain.schedule.dto.request.CreateScheduleRequestDTO;
 import conference.clerker.domain.schedule.dto.response.FindSchedulesDTO;
-import conference.clerker.domain.schedule.dto.request.JoinScheduleRequestDTO;
 import conference.clerker.domain.schedule.entity.Schedule;
 import conference.clerker.domain.schedule.repository.ScheduleRepository;
 import conference.clerker.global.exception.ErrorCode;

@@ -103,7 +103,7 @@ public class ProjectController {
 
     // 프로젝트 이름 및 멤버 정보 수정
     @PatchMapping("/{projectID}")
-    @Operation(summary = "프로젝트명 수정", description = "프로젝트명 수정하는 API")
+    @Operation(summary = "프로젝트명 수정", description = "프로젝트명 수정 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "PROJECT-001", description = "프로젝트를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
@@ -135,7 +135,7 @@ public class ProjectController {
 
     // 프로젝트 나가기
     @DeleteMapping("/out/{projectID}")
-    @Operation(summary = "프로젝트 나가기", description = "토큰 필요")
+    @Operation(summary = "프로젝트 나가기", description = "방장만 내보낼 수 있음.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "성공", content = @Content(mediaType = "application/json")),
     })
@@ -144,7 +144,7 @@ public class ProjectController {
             @Parameter(required = true, description = "프로젝트 Id" ,in = ParameterIn.PATH)
             @PathVariable("projectID") Long projectId) {
         organizationService.outOfProject(member.getId(), projectId);
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.noContent().build();
     }
 
 }

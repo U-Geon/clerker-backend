@@ -4,5 +4,5 @@ spring:
       - application-db.yml
       - application-jwt.yml
       - application-swagger.yml
-#      - application-aws.yml
-#      - application-oauth.yml
+      - application-aws.yml
+      - application-oauth.yml

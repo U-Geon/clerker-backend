@@ -1,4 +1,12 @@
 package conference.clerker.oauth2.oauth2.user;
 
-public class OAuth2Provider {
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@Getter
+@RequiredArgsConstructor
+public enum OAuth2Provider {
+    GOOGLE("google");
+
+    private final String registrationId;
 }

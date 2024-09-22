@@ -1,7 +1,10 @@
 package test.googlemeetapi.global.config;
 
-import lombok.RequiredArgsConstructor;
+
+
+import conference.clerker.oauth2.oauth2.handler.OAuth2AuthenticationSuccessHandler;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -15,16 +18,26 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
+
+
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
+@ComponentScan(basePackages = "conference.clerker.oauth2.oauth2.handler")
+// @RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final OAuth2AuthenticationSuccessHandler oauth2AuthenticationSuccessHandler;
+
+    public SecurityConfig(OAuth2AuthenticationSuccessHandler oauth2AuthenticationSuccessHandler) {
+        this.oauth2AuthenticationSuccessHandler = oauth2AuthenticationSuccessHandler;
+    }
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() { // security를 적용하지 않을 리소스
         return web -> web.ignoring()
                 .requestMatchers("/error", "/favicon.ico");
     }
+
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
@@ -40,10 +53,12 @@ public class SecurityConfig {
                         // 추가적인 URL 권한 설정
                         .anyRequest().authenticated() // 그 외 요청은 인증 필요.
                 )
-                // Token 로그인 방식에서는 session 필요 없음.
-                .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-                // Jwt 설정 추가
 
+                // Token 로그인 방식에서는 session 필요 없음.
+                .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .oauth2Login(oauth2 -> oauth2
+                                .successHandler(oauth2AuthenticationSuccessHandler)
+                );
 
         return httpSecurity.build();
     }

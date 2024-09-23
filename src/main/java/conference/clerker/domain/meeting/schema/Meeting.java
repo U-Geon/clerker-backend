@@ -34,6 +34,9 @@ public class Meeting {
     @JoinColumn(name = "project_id")
     private Project project;
 
+    @Column(name = "url")
+    private String url;
+
     public static Meeting create(Project project, String name, LocalDateTime startDate, Boolean isEnded) {
         return Meeting.builder()
                 .name(name)

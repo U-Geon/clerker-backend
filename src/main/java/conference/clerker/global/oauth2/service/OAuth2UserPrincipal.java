@@ -1,6 +1,9 @@
-package conference.clerker.oauth2.oauth2.service;
+package conference.clerker.global.oauth2.service;
 
-import conference.clerker.oauth2.oauth2.user.OAuth2UserInfo;
+import conference.clerker.domain.member.schema.Member;
+import conference.clerker.global.oauth2.user.GoogleOAuth2UserInfo;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -9,11 +12,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
+@Getter @Setter
 public class OAuth2UserPrincipal implements OAuth2User, UserDetails {
-    private final OAuth2UserInfo userInfo;
 
-    public OAuth2UserPrincipal(OAuth2UserInfo userInfo) {
-        this.userInfo = userInfo;
+    private GoogleOAuth2UserInfo googleOAuth2UserInfo;
+    private Member member;
+
+    public OAuth2UserPrincipal(GoogleOAuth2UserInfo googleOAuth2UserInfo, Member member) {
+        this.googleOAuth2UserInfo = googleOAuth2UserInfo;
+        this.member = member;
     }
 
     @Override
@@ -23,7 +30,7 @@ public class OAuth2UserPrincipal implements OAuth2User, UserDetails {
 
     @Override
     public String getUsername() {
-        return userInfo.getEmail();
+        return googleOAuth2UserInfo.getName();
     }
 
     @Override
@@ -48,7 +55,7 @@ public class OAuth2UserPrincipal implements OAuth2User, UserDetails {
 
     @Override
     public Map<String, Object> getAttributes() {
-        return userInfo.getAttributes();
+        return googleOAuth2UserInfo.getAttributes();
     }
 
     @Override
@@ -58,10 +65,7 @@ public class OAuth2UserPrincipal implements OAuth2User, UserDetails {
 
     @Override
     public String getName() {
-        return userInfo.getEmail();
+        return googleOAuth2UserInfo.getEmail();
     }
 
-    public OAuth2UserInfo getUserInfo() {
-        return userInfo;
-    }
 }

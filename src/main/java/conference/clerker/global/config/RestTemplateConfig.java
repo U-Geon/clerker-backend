@@ -1,4 +1,4 @@
-package conference.clerker.oauth2.config;
+package conference.clerker.global.config;
 
 
 import org.springframework.boot.web.client.RestTemplateBuilder;

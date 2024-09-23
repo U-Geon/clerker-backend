@@ -1,9 +1,12 @@
-package conference.clerker.oauth2.oauth2.service;
+package conference.clerker.global.oauth2.service;
 
-import conference.clerker.oauth2.oauth2.exception.OAuth2AuthenticationProcessingException;
-import conference.clerker.oauth2.oauth2.user.OAuth2UserInfo;
-import conference.clerker.oauth2.oauth2.user.OAuth2UserInfoFactory;
+import conference.clerker.domain.member.repository.MemberRepository;
+import conference.clerker.domain.member.schema.Member;
+import conference.clerker.global.oauth2.exception.OAuth2AuthenticationProcessingException;
+import conference.clerker.global.oauth2.user.GoogleOAuth2UserInfo;
+import conference.clerker.global.oauth2.user.OAuth2UserInfoFactory;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -15,14 +18,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 
-
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
+    private final MemberRepository memberRepository;
+
     @Override
     public OAuth2User loadUser(OAuth2UserRequest oAuth2UserRequest) throws OAuth2AuthenticationException {
 
+
+        log.info("메서드 실행 : loadUser");
         OAuth2User oAuth2User = super.loadUser(oAuth2UserRequest);
 
         try {
@@ -30,7 +37,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         } catch (AuthenticationException ex) {
             throw ex;
         } catch (Exception ex) {
-            // Throwing an instance of AuthenticationException will trigger the OAuth2AuthenticationFailureHandler
+
             throw new InternalAuthenticationServiceException(ex.getMessage(), ex.getCause());
         }
     }
@@ -40,17 +47,20 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String registrationId = userRequest.getClientRegistration()
                 .getRegistrationId();
 
-        String accessToken = userRequest.getAccessToken().getTokenValue();
-
-        OAuth2UserInfo oAuth2UserInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(registrationId,
-                accessToken,
-                oAuth2User.getAttributes());
+        GoogleOAuth2UserInfo oAuth2UserInfo = (GoogleOAuth2UserInfo) OAuth2UserInfoFactory.getOAuth2UserInfo(registrationId, oAuth2User.getAttributes());
 
         // OAuth2UserInfo field value validation
         if (!StringUtils.hasText(oAuth2UserInfo.getEmail())) {
             throw new OAuth2AuthenticationProcessingException("Email not found from OAuth2 provider");
         }
 
-        return new OAuth2UserPrincipal(oAuth2UserInfo);
+        Member member = createMember(oAuth2UserInfo.getEmail(), oAuth2UserInfo.getName());
+
+        return new OAuth2UserPrincipal(oAuth2UserInfo, member);
+    }
+
+    private Member createMember(String email, String username) {
+        Member member = memberRepository.findByEmail(email).orElse(Member.create(username, email));
+        return memberRepository.save(member);
     }
 }

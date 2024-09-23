@@ -1,4 +1,4 @@
-package conference.clerker.oauth2.oauth2.util;
+package conference.clerker.global.oauth2.util;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;

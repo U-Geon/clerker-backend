@@ -1,4 +1,4 @@
-package conference.clerker.oauth2.oauth2.exception;
+package conference.clerker.global.oauth2.exception;
 
 import org.springframework.security.core.AuthenticationException;
 

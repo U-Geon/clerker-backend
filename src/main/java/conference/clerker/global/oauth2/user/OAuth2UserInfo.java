@@ -1,4 +1,4 @@
-package conference.clerker.oauth2.oauth2.user;
+package conference.clerker.global.oauth2.user;
 
 import java.util.Map;
 

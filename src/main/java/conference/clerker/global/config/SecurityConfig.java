@@ -1,8 +1,10 @@
-package test.googlemeetapi.global.config;
+package conference.clerker.global.config;
 
-
-
-import conference.clerker.oauth2.oauth2.handler.OAuth2AuthenticationSuccessHandler;
+import conference.clerker.global.jwt.JwtAuthenticationFilter; // JwtAuthenticationFilter 임포트
+import conference.clerker.global.oauth2.handler.OAuth2AuthenticationFailureHandler;
+import conference.clerker.global.oauth2.handler.OAuth2AuthenticationSuccessHandler;
+import conference.clerker.global.oauth2.service.CustomOAuth2UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -12,32 +14,29 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter; // UsernamePasswordAuthenticationFilter 추가
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
-
-
 @Configuration
 @EnableWebSecurity
-@ComponentScan(basePackages = "conference.clerker.oauth2.oauth2.handler")
-// @RequiredArgsConstructor
+@RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final OAuth2AuthenticationSuccessHandler oauth2AuthenticationSuccessHandler;
+    private final OAuth2AuthenticationFailureHandler oauth2AuthenticationFailureHandler;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
-    public SecurityConfig(OAuth2AuthenticationSuccessHandler oauth2AuthenticationSuccessHandler) {
-        this.oauth2AuthenticationSuccessHandler = oauth2AuthenticationSuccessHandler;
-    }
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() { // security를 적용하지 않을 리소스
         return web -> web.ignoring()
                 .requestMatchers("/error", "/favicon.ico");
     }
-
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
@@ -49,19 +48,23 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // cors 설정
                 // 특정 URL에 대한 권한 설정.
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/swagger", "/swagger-ui/index.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/", "/swagger", "/swagger-ui/index.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs/**").permitAll()
                         // 추가적인 URL 권한 설정
                         .anyRequest().authenticated() // 그 외 요청은 인증 필요.
                 )
-
                 // Token 로그인 방식에서는 session 필요 없음.
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2Login(oauth2 -> oauth2
-                                .successHandler(oauth2AuthenticationSuccessHandler)
-                );
+                        .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig.userService(customOAuth2UserService))
+                        .successHandler(oauth2AuthenticationSuccessHandler)
+                        .failureHandler(oauth2AuthenticationFailureHandler)
+                )
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return httpSecurity.build();
     }
+
+
 
     // CORS 설정.
     @Bean

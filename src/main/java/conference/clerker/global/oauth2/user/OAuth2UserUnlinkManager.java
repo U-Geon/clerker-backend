@@ -1,6 +1,6 @@
-package conference.clerker.oauth2.oauth2.user;
+package conference.clerker.global.oauth2.user;
 
-import conference.clerker.oauth2.oauth2.exception.OAuth2AuthenticationProcessingException;
+import conference.clerker.global.oauth2.exception.OAuth2AuthenticationProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

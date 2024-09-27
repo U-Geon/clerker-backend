@@ -1,4 +1,4 @@
-package conference.clerker.domain.organization.entity;
+package conference.clerker.domain.organization.schema;
 
 
 import conference.clerker.domain.member.schema.Member;
@@ -32,11 +32,8 @@ public class Organization {
     @Column(name = "type")
     private String type;
 
-    @Column(name = "phone_number")
-    private String phoneNumber;
-
     public static Organization createMember(Member member, Project project) {
-        return conference.clerker.domain.organization.entity.Organization.builder()
+        return conference.clerker.domain.organization.schema.Organization.builder()
                 .role(Role.MEMBER)
                 .member(member)
                 .project(project)

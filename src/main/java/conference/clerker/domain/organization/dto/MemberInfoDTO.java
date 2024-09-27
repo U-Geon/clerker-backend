@@ -1,10 +1,11 @@
 package conference.clerker.domain.organization.dto;
 
+import conference.clerker.domain.organization.schema.Role;
+
 public record MemberInfoDTO(
         Long organizationId,
         String username,
         String email,
-        String phoneNumber,
-        String role,
+        Role role,
         String type
 ) {}

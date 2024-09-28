@@ -6,6 +6,5 @@ public record ScheduleTimeWithMemberInfoDTO(
         List<String> timeTable,
         String username,
         String email,
-        String phoneNumber,
         String type
 ) {}

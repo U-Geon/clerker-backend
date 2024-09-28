@@ -10,7 +10,7 @@ import java.util.List;
 
 
 public interface ScheduleTimeRepository extends JpaRepository<ScheduleTime, Long> {
-    @Query("SELECT st.timeTable, m.username, m.email, o.phoneNumber, o.type " +
+    @Query("SELECT st.timeTable, m.username, m.email, o.type " +
             "FROM ScheduleTime st " +
             "JOIN Organization o ON o.member.id = st.memberId " +
             "JOIN Member m ON m.id = o.member.id " +

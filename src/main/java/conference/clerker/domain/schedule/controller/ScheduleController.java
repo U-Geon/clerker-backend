@@ -5,7 +5,6 @@ import conference.clerker.domain.meeting.dto.response.FindMeetingsDTO;
 import conference.clerker.domain.meeting.service.MeetingService;
 import conference.clerker.domain.member.schema.Member;
 import conference.clerker.domain.notification.service.NotificationService;
-import conference.clerker.domain.organization.dto.ProjectInfoDTO;
 import conference.clerker.domain.organization.service.OrganizationService;
 import conference.clerker.domain.schedule.dto.request.CreateScheduleRequestDTO;
 import conference.clerker.domain.schedule.dto.response.FindSchedulesDTO;
@@ -53,14 +52,12 @@ public class ScheduleController {
         scheduleService.create(projectId, member.getId(), requestDTO);
         if (requestDTO.isNotify()) {
             organizationService.findMembersByProjectId(projectId).forEach(
-                    target ->  {
-                        notificationService.notify(target.getId(),
-                                projectId,
-                                requestDTO.name(),
-                                requestDTO.startDate(),
-                                requestDTO.endDate(),
-                                "회의 스케쥴");
-                    }
+                    target -> notificationService.notify(target.getId(),
+                            projectId,
+                            requestDTO.name(),
+                            requestDTO.startDate(),
+                            requestDTO.endDate(),
+                            "회의 스케쥴")
             );
         }
         return ResponseEntity.noContent().build();

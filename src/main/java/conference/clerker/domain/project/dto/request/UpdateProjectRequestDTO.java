@@ -1,6 +1,6 @@
 package conference.clerker.domain.project.dto.request;
 
-import conference.clerker.domain.organization.entity.Role;
+import conference.clerker.domain.organization.schema.Role;
 import jakarta.validation.constraints.NotBlank;
 import java.util.List;
 
@@ -11,10 +11,7 @@ public record UpdateProjectRequestDTO(
 ) {
     public record OrganizationInfo(
             Long organizationId,
-            String memberName,
             Role role,
-            String email,
-            String phoneNumber,
             String type
     ) {}
 }

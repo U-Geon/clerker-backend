@@ -20,7 +20,7 @@ public class Profile {
     @Column(name = "filename")
     private String filename;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 

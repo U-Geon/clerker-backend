@@ -1,7 +1,7 @@
 package conference.clerker.domain.notification.entity;
 
 import conference.clerker.domain.member.schema.Member;
-import conference.clerker.domain.project.entity.Project;
+import conference.clerker.domain.project.schema.Project;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -25,7 +25,7 @@ public class Notification {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "project_id")
     private Project project;
 

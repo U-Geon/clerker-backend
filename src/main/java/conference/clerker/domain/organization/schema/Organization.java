@@ -1,14 +1,16 @@
 package conference.clerker.domain.organization.schema;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import conference.clerker.domain.member.schema.Member;
-import conference.clerker.domain.project.entity.Project;
+import conference.clerker.domain.project.schema.Project;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+
 @Entity
 @Getter @Setter
-@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Organization {
@@ -32,19 +34,31 @@ public class Organization {
     @Column(name = "type")
     private String type;
 
+    public void setProject(Project project) {
+        this.project = project;
+        if (project.getOrganizations() == null) {
+            project.setOrganizations(new ArrayList<>()); // 초기화
+        }
+        project.getOrganizations().add(this);
+    }
+
+    public void removeProject(Project project) {
+        project.getOrganizations().remove(this);
+    }
+
     public static Organization createMember(Member member, Project project) {
-        return conference.clerker.domain.organization.schema.Organization.builder()
-                .role(Role.MEMBER)
-                .member(member)
-                .project(project)
-                .build();
+        Organization organization = new Organization();
+        organization.setMember(member);
+        organization.setProject(project);
+        organization.setRole(Role.MEMBER);
+        return organization;
     }
 
     public static Organization createOwner(Member member, Project project) {
-        return Organization.builder()
-                .role(Role.OWNER)
-                .member(member)
-                .project(project)
-                .build();
+        Organization organization = new Organization();
+        organization.setMember(member);
+        organization.setProject(project);
+        organization.setRole(Role.OWNER);
+        return organization;
     }
 }

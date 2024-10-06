@@ -37,6 +37,6 @@ public class ScheduleService {
 
     // project ID를 통한 스케쥴 조회
     public List<FindSchedulesDTO> findByProjectId(Long projectId) {
-        return scheduleRepository.findByProjectId(projectId).stream().map(FindSchedulesDTO::new).toList();
+        return scheduleRepository.findAllByProjectId(projectId).stream().map(FindSchedulesDTO::new).toList();
     }
 }

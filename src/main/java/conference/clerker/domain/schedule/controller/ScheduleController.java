@@ -38,7 +38,7 @@ public class ScheduleController {
     private final OrganizationService organizationService;
 
     @PostMapping("/create/{projectID}")
-    @Operation(summary = "스케쥴 생성 API", description = "스케쥴 생성 + 알림 생성 체크 시 프로젝트 내 멤버들에게 알림 생성")
+    @Operation(summary = "스케쥴 생성 API", description = "1. 알림 생성 체크 시 프로젝트 내 멤버들에게 알림 생성\n2. time은 HH:MM:SS 식으로 보내주세요!")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "성공", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "PROJECT-001", description = "프로젝트를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
@@ -92,7 +92,7 @@ public class ScheduleController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/detail/{projectID}/{scheduleID}")
+    @GetMapping("/{projectID}/detail/{scheduleID}")
     @Operation(summary = "스케쥴 상세 조회 API", description = "개인별 입력한 스케쥴 시간 List + 참여한 인원 List 조회")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공", content = @Content(mediaType = "application/json")),

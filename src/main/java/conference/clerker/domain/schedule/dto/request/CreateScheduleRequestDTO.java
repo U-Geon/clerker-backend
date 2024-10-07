@@ -1,8 +1,10 @@
 package conference.clerker.domain.schedule.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 public record CreateScheduleRequestDTO(
         @NotBlank
@@ -14,7 +16,17 @@ public record CreateScheduleRequestDTO(
         @NotBlank
         Boolean isNotify,
         @NotBlank
-        LocalTime startTime,
+        String startTime,
         @NotBlank
-        LocalTime endTime
-) {}
+        String endTime
+) {
+        @JsonIgnore
+        public LocalTime getStartTimeAsLocalTime() {
+                return LocalTime.parse(startTime, DateTimeFormatter.ofPattern("HH:mm:ss"));
+        }
+
+        @JsonIgnore
+        public LocalTime getEndTimeAsLocalTime() {
+                return LocalTime.parse(endTime, DateTimeFormatter.ofPattern("HH:mm:ss"));
+        }
+}

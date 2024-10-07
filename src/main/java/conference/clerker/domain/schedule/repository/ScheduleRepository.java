@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
-    List<Schedule> findByProjectId(Long projectId);
+    List<Schedule> findAllByProjectId(Long projectId);
 
     @Modifying
     @Query("DELETE FROM Schedule s WHERE s.project.id = :projectId")

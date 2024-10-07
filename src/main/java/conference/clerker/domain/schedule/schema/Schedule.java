@@ -65,9 +65,10 @@ public class Schedule {
                 .member(member)
                 .startDate(requestDTO.startDate())
                 .endDate(requestDTO.endDate())
-                .startTime(requestDTO.startTime())
-                .endTime(requestDTO.endTime())
+                .startTime(requestDTO.getStartTimeAsLocalTime())
+                .endTime(requestDTO.getEndTimeAsLocalTime())
                 .name(requestDTO.name())
+                .isEnded(false)
                 .build();
     }
 

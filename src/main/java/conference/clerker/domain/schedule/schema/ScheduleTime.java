@@ -1,4 +1,4 @@
-package conference.clerker.domain.schedule.entity;
+package conference.clerker.domain.schedule.schema;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;

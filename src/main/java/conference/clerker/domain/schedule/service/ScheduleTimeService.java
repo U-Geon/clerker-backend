@@ -2,12 +2,12 @@ package conference.clerker.domain.schedule.service;
 
 
 import conference.clerker.domain.schedule.dto.response.ScheduleTimeWithMemberInfoDTO;
-import conference.clerker.domain.schedule.entity.Schedule;
-import conference.clerker.domain.schedule.entity.ScheduleTime;
-import conference.clerker.domain.schedule.entity.TimeTable;
+import conference.clerker.domain.schedule.schema.Schedule;
+import conference.clerker.domain.schedule.schema.ScheduleTime;
 import conference.clerker.domain.schedule.repository.ScheduleRepository;
 import conference.clerker.domain.schedule.repository.ScheduleTimeRepository;
 import conference.clerker.domain.schedule.repository.TimeTableRepository;
+import conference.clerker.domain.schedule.schema.TimeTable;
 import conference.clerker.global.exception.ErrorCode;
 import conference.clerker.global.exception.domain.ScheduleException;
 import lombok.RequiredArgsConstructor;

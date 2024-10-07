@@ -2,14 +2,16 @@ package conference.clerker.domain.schedule.service;
 
 import conference.clerker.domain.member.schema.Member;
 import conference.clerker.domain.member.repository.MemberRepository;
-import conference.clerker.domain.project.entity.Project;
+import conference.clerker.domain.project.schema.Project;
 import conference.clerker.domain.project.repository.ProjectRepository;
 import conference.clerker.domain.schedule.dto.request.CreateScheduleRequestDTO;
 import conference.clerker.domain.schedule.dto.response.FindSchedulesDTO;
-import conference.clerker.domain.schedule.entity.Schedule;
+import conference.clerker.domain.schedule.repository.ScheduleTimeRepository;
+import conference.clerker.domain.schedule.schema.Schedule;
 import conference.clerker.domain.schedule.repository.ScheduleRepository;
 import conference.clerker.global.exception.ErrorCode;
 import conference.clerker.global.exception.domain.AuthException;
+import conference.clerker.global.exception.domain.ScheduleException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +26,7 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final ProjectRepository projectRepository;
     private final MemberRepository memberRepository;
+    private final ScheduleTimeRepository scheduleTimeRepository;
 
 
     // 스케쥴 생성
@@ -38,5 +41,10 @@ public class ScheduleService {
     // project ID를 통한 스케쥴 조회
     public List<FindSchedulesDTO> findByProjectId(Long projectId) {
         return scheduleRepository.findAllByProjectId(projectId).stream().map(FindSchedulesDTO::new).toList();
+    }
+
+    @Transactional
+    public void deleteAllScheduleByProjectId(Long projectId) {
+        scheduleRepository.deleteAllByProjectId(projectId);
     }
 }

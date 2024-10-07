@@ -1,7 +1,7 @@
 package conference.clerker.domain.schedule.dto.response;
 
-import conference.clerker.domain.schedule.entity.ScheduleTime;
-import conference.clerker.domain.schedule.entity.TimeTable;
+import conference.clerker.domain.schedule.schema.ScheduleTime;
+import conference.clerker.domain.schedule.schema.TimeTable;
 
 import java.util.List;
 

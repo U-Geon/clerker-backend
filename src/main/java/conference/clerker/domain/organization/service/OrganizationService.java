@@ -9,7 +9,7 @@ import conference.clerker.domain.organization.schema.Organization;
 import conference.clerker.domain.organization.schema.Role;
 import conference.clerker.domain.organization.repository.OrganizationRepository;
 import conference.clerker.domain.project.dto.request.UpdateProjectRequestDTO;
-import conference.clerker.domain.project.entity.Project;
+import conference.clerker.domain.project.schema.Project;
 import conference.clerker.domain.project.repository.ProjectRepository;
 import conference.clerker.global.exception.ErrorCode;
 import conference.clerker.global.exception.domain.AuthException;
@@ -77,12 +77,11 @@ public class OrganizationService {
 
     // 프로젝트 내 멤버들 삭제
     @Transactional
-    public Boolean deleteMembers(Long projectId) {
+    public void deleteMembers(Long projectId) {
         try {
             organizationRepository.deleteAllByProjectId(projectId);
-            return true;
         } catch (Exception e) {
-            return false;
+            throw new OrganizationException(ErrorCode.ORGANIZATION_NOT_FOUND);
         }
     }
 

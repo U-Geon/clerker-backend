@@ -1,6 +1,6 @@
 package conference.clerker.domain.meeting.schema;
 
-import conference.clerker.domain.project.entity.Project;
+import conference.clerker.domain.project.schema.Project;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;

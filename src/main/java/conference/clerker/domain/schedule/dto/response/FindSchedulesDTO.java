@@ -1,6 +1,6 @@
 package conference.clerker.domain.schedule.dto.response;
 
-import conference.clerker.domain.schedule.entity.Schedule;
+import conference.clerker.domain.schedule.schema.Schedule;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;

@@ -2,8 +2,8 @@ package conference.clerker.domain.schedule.service;
 
 
 import conference.clerker.domain.schedule.dto.response.ScheduleTimeWithMemberInfoDTO;
-import conference.clerker.domain.schedule.entity.Schedule;
-import conference.clerker.domain.schedule.entity.ScheduleTime;
+import conference.clerker.domain.schedule.schema.Schedule;
+import conference.clerker.domain.schedule.schema.ScheduleTime;
 import conference.clerker.domain.schedule.repository.ScheduleRepository;
 import conference.clerker.domain.schedule.repository.ScheduleTimeRepository;
 import conference.clerker.global.exception.ErrorCode;

@@ -1,4 +1,4 @@
-package conference.clerker.domain.schedule.entity;
+package conference.clerker.domain.schedule.schema;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -28,10 +28,19 @@ public class ScheduleTime {
     private Long memberId;
 
     public static ScheduleTime create(List<String> timeTable, Schedule schedule, Long memberId) {
-        return ScheduleTime.builder()
-                .timeTable(timeTable)
-                .schedule(schedule)
-                .memberId(memberId)
-                .build();
+        ScheduleTime scheduleTime = new ScheduleTime();
+        scheduleTime.setTimeTable(timeTable);
+        scheduleTime.setScheduleTime(schedule);
+        scheduleTime.setMemberId(memberId);
+        return scheduleTime;
+    }
+
+    public void setScheduleTime(Schedule schedule) {
+        schedule.getScheduleTimes().add(this);
+        this.schedule = schedule;
+    }
+
+    public void removeScheduleTime(Schedule schedule) {
+        schedule.getScheduleTimes().remove(this);
     }
 }

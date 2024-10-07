@@ -2,12 +2,15 @@ package conference.clerker.domain.project.controller;
 
 
 import conference.clerker.domain.member.schema.Member;
+import conference.clerker.domain.notification.service.NotificationService;
 import conference.clerker.domain.organization.dto.ProjectInfoDTO;
 import conference.clerker.domain.organization.service.OrganizationService;
 import conference.clerker.domain.project.dto.request.InviteMembersRequestDTO;
 import conference.clerker.domain.project.dto.request.UpdateProjectRequestDTO;
-import conference.clerker.domain.project.entity.Project;
+import conference.clerker.domain.project.schema.Project;
 import conference.clerker.domain.project.service.ProjectService;
+import conference.clerker.domain.schedule.service.ScheduleService;
+import conference.clerker.global.aop.roleCheck.RoleCheck;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -28,6 +31,8 @@ public class ProjectController {
 
     private final ProjectService projectService;
     private final OrganizationService organizationService;
+    private final ScheduleService scheduleService;
+    private final NotificationService notificationService;
 
     @PostMapping("/create")
     @Operation(summary = "프로젝트 생성", description = "프로젝트 생성 탭 클릭 시 요청. 토큰 필요")
@@ -37,22 +42,22 @@ public class ProjectController {
             @ApiResponse(responseCode = "AUTH-001", description = "사용자를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
     })
     public ResponseEntity<Void> createProject(@AuthenticationPrincipal Member member) {
-        Long id = projectService.createProject();
-        organizationService.createOwner(member.getId(), id);
+        Long projectId = projectService.createProject();
+        organizationService.createOwner(member.getId(), projectId);
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/create/{projectID}")
+    @PostMapping("/{projectID}/create-child")
     @Operation(summary = "하위 프로젝트 생성", description = "하위 프로젝트 생성 탭 클릭 시 요청. 토큰 필요")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "성공", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "PROJECT-001", description = "프로젝트를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "AUTH-001", description = "사용자를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
     })
-        public ResponseEntity<Void> createProject(
-                @Parameter(required = true, description = "부모 프로젝트 ID", in = ParameterIn.PATH)
-                @PathVariable("projectID") Long projectId,
-                @AuthenticationPrincipal Member member) {
+    public ResponseEntity<Void> createProject(
+            @Parameter(required = true, description = "부모 프로젝트 ID", in = ParameterIn.PATH)
+            @PathVariable("projectID") Long projectId,
+            @AuthenticationPrincipal Member member) {
         Long childProjectId = projectService.createChildProject(projectId);
         organizationService.createOwner(member.getId(), childProjectId);
         return ResponseEntity.noContent().build();
@@ -70,8 +75,8 @@ public class ProjectController {
         return ResponseEntity.ok().body(organizationService.findProjectByMember(member.getId()));
     }
 
-    @GetMapping("/{projectID}")
-    @Operation(summary = "프로젝트 이름 + 프로젝트 내 회원 정보 API", description = "프로젝트 이름 및 프로젝트 내 회원들 목록을 조회하는 API.")
+    @GetMapping("/{projectID}/info")
+    @Operation(summary = "프로젝트 정보 (이름 + 멤버 정보) 조회 API", description = "프로젝트 이름 및 프로젝트 내 회원들 목록을 조회하는 API.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "PROJECT-001", description = "프로젝트를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
@@ -83,27 +88,30 @@ public class ProjectController {
     }
 
     // 프로젝트 삭제
+    @RoleCheck(role = "OWNER")
     @DeleteMapping("/{projectID}")
     @Operation(summary = "프로젝트 삭제", description = "프로젝트 삭제 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "성공", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "404", description = "프로젝트를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
     })
-    public ResponseEntity<Void> delete(
+    public ResponseEntity<String> deleteProject(
             @Parameter(required = true, description = "프로젝트 Id" ,in = ParameterIn.PATH)
             @PathVariable("projectID") Long projectId) {
+        scheduleService.deleteAllScheduleByProjectId(projectId);
+        notificationService.deleteAllByProjectId(projectId);
         Boolean isDeletedProject = projectService.deleteById(projectId);
-        Boolean isDeletedMembers = organizationService.deleteMembers(projectId);
-        if(isDeletedProject && isDeletedMembers) {
+        if(isDeletedProject) {
             return ResponseEntity.noContent().build();
         } else {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.internalServerError().body("{\"msg\" : \"project delete failed\"}");
         }
     }
 
     // 프로젝트 이름 및 멤버 정보 수정
+    @RoleCheck(role = "OWNER")
     @PatchMapping("/{projectID}")
-    @Operation(summary = "프로젝트명 수정", description = "프로젝트명 수정 API")
+    @Operation(summary = "프로젝트 정보 (이름 + 멤버 정보) 수정 API", description = " 수정 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "PROJECT-001", description = "프로젝트를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
@@ -118,8 +126,9 @@ public class ProjectController {
     }
 
     // 회원 초대 API
-    @PostMapping("/join/{projectID}")
-    @Operation(summary = "회원 초대", description = "email List를 받아 프로젝트 내에 멤버를 초대하는 API")
+    @RoleCheck(role = "OWNER")
+    @PostMapping("/{projectID}/join")
+    @Operation(summary = "회원 초대", description = "email List를 받아서 멤버 초대. List가 비어 있으면 에러")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "PROJECT-001", description = "프로젝트를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
@@ -134,7 +143,8 @@ public class ProjectController {
     }
 
     // 프로젝트 나가기
-    @DeleteMapping("/out/{projectID}")
+    @RoleCheck(role = "MEMBER")
+    @DeleteMapping("/{projectID}/out")
     @Operation(summary = "프로젝트 나가기", description = "방장만 내보낼 수 있음.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "성공", content = @Content(mediaType = "application/json")),

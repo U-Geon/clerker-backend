@@ -1,7 +1,7 @@
-package conference.clerker.domain.schedule.entity;
+package conference.clerker.domain.schedule.schema;
 
 import conference.clerker.domain.member.schema.Member;
-import conference.clerker.domain.project.entity.Project;
+import conference.clerker.domain.project.schema.Project;
 import conference.clerker.domain.schedule.dto.request.CreateScheduleRequestDTO;
 import jakarta.persistence.*;
 import lombok.*;
@@ -11,6 +11,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter @Setter
@@ -54,15 +56,19 @@ public class Schedule {
     @JoinColumn(name = "project_id")
     private Project project;
 
+    @OneToMany(mappedBy = "schedule")
+    private List<ScheduleTime> scheduleTimes = new ArrayList<>();
+
     public static Schedule create(Project project, Member member, CreateScheduleRequestDTO requestDTO) {
         return Schedule.builder()
                 .project(project)
                 .member(member)
                 .startDate(requestDTO.startDate())
                 .endDate(requestDTO.endDate())
-                .startTime(requestDTO.startTime())
-                .endTime(requestDTO.endTime())
+                .startTime(requestDTO.getStartTimeAsLocalTime())
+                .endTime(requestDTO.getEndTimeAsLocalTime())
                 .name(requestDTO.name())
+                .isEnded(false)
                 .build();
     }
 

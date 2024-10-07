@@ -32,7 +32,6 @@ public class Member implements UserDetails {
                 .build();
     }
 
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();

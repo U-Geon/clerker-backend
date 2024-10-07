@@ -33,14 +33,14 @@ public class NotificationController {
         return ResponseEntity.ok().body(notificationService.findAllByMemberId(member.getId()));
     }
 
-    @DeleteMapping("/{notificationId}")
+    @DeleteMapping("/{notificationID}")
     @Operation(summary = "알림 삭제")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "성공", content = @Content(mediaType = "application/json")),
     })
     public ResponseEntity<Void> delete(
             @Parameter(required = true, description = "프로젝트 Id" ,in = ParameterIn.PATH)
-            @PathVariable("notificationId") Long notificationId) {
+            @PathVariable("notificationID") Long notificationId) {
 
         notificationService.delete(notificationId);
 

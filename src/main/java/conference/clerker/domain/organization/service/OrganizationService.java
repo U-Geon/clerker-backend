@@ -5,14 +5,15 @@ import conference.clerker.domain.member.schema.Member;
 import conference.clerker.domain.member.repository.MemberRepository;
 import conference.clerker.domain.organization.dto.MemberInfoDTO;
 import conference.clerker.domain.organization.dto.ProjectInfoDTO;
-import conference.clerker.domain.organization.entity.Organization;
-import conference.clerker.domain.organization.entity.Role;
+import conference.clerker.domain.organization.schema.Organization;
+import conference.clerker.domain.organization.schema.Role;
 import conference.clerker.domain.organization.repository.OrganizationRepository;
 import conference.clerker.domain.project.dto.request.UpdateProjectRequestDTO;
-import conference.clerker.domain.project.entity.Project;
+import conference.clerker.domain.project.schema.Project;
 import conference.clerker.domain.project.repository.ProjectRepository;
 import conference.clerker.global.exception.ErrorCode;
 import conference.clerker.global.exception.domain.AuthException;
+import conference.clerker.global.exception.domain.OrganizationException;
 import conference.clerker.global.exception.domain.ProjectException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -43,11 +44,18 @@ public class OrganizationService {
     public void inviteMember(List<String> emails, Long projectId) {
         Project project = projectRepository.findById(projectId).orElseThrow(() -> new ProjectException(ErrorCode.PROJECT_NOT_FOUND));
 
-        emails.forEach(email -> {
+        for (String email : emails) {
             Member member = memberRepository.findByEmail(email).orElseThrow(() -> new AuthException(ErrorCode.MEMBER_NOT_FOUND));
+            boolean isMemberAlreadyInProject = organizationRepository
+                    .findByMemberIdAndProjectId(member.getId(), projectId)
+                    .isPresent();
+
+            if (isMemberAlreadyInProject) {
+                throw new OrganizationException(ErrorCode.DUPLICATED_ORGANIZATION);
+            }
             Organization organizationMember = Organization.createMember(member, project);
             organizationRepository.save(organizationMember);
-        });
+        }
     }
 
     // 특정 회원의 전체 프로젝트 목록
@@ -69,12 +77,11 @@ public class OrganizationService {
 
     // 프로젝트 내 멤버들 삭제
     @Transactional
-    public Boolean deleteMembers(Long projectId) {
+    public void deleteMembers(Long projectId) {
         try {
             organizationRepository.deleteAllByProjectId(projectId);
-            return true;
         } catch (Exception e) {
-            return false;
+            throw new OrganizationException(ErrorCode.ORGANIZATION_NOT_FOUND);
         }
     }
 
@@ -82,8 +89,7 @@ public class OrganizationService {
     @Transactional
     public void updateMembers(UpdateProjectRequestDTO requestDTO) {
         requestDTO.members().forEach(member -> {
-            Organization organization = organizationRepository.findById(member.organizationId()).orElseThrow(IllegalArgumentException::new);
-            organization.setPhoneNumber(member.phoneNumber());
+            Organization organization = organizationRepository.findById(member.organizationId()).orElseThrow(() -> new OrganizationException(ErrorCode.ORGANIZATION_NOT_FOUND));
             organization.setRole(member.role());
             organization.setType(member.type());
         });
@@ -92,10 +98,14 @@ public class OrganizationService {
     // 프로젝트 나가기
     @Transactional
     public void outOfProject(Long memberId, Long projectId) {
-        Organization organization = organizationRepository.findByMemberIdAndProjectId(memberId, projectId).orElseThrow(IllegalArgumentException::new);
-        if(organization.getRole() == Role.OWNER) {
-            organizationRepository.deleteById(organization.getId());
-        }
-        else throw new IllegalArgumentException("You're Not OWNER.");
+        Organization organization = organizationRepository.findByMemberIdAndProjectId(memberId, projectId).orElseThrow(() -> new OrganizationException(ErrorCode.ORGANIZATION_NOT_FOUND));
+        organizationRepository.deleteById(organization.getId());
+    }
+
+    // role getter
+    public Role findRoleByMemberAndProject(Long memberId, Long projectId) {
+        Organization organization = organizationRepository.findByMemberIdAndProjectId(memberId, projectId)
+                .orElseThrow(() -> new OrganizationException(ErrorCode.ORGANIZATION_NOT_FOUND));
+        return organization.getRole();
     }
 }

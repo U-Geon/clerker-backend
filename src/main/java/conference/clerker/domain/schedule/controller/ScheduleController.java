@@ -2,6 +2,7 @@ package conference.clerker.domain.schedule.controller;
 
 
 import conference.clerker.domain.meeting.dto.response.FindMeetingsDTO;
+import conference.clerker.domain.meeting.service.MeetingFileService;
 import conference.clerker.domain.meeting.service.MeetingService;
 import conference.clerker.domain.member.schema.Member;
 import conference.clerker.domain.notification.service.NotificationService;
@@ -36,6 +37,7 @@ public class ScheduleController {
     private final ScheduleTimeService scheduleTimeService;
     private final NotificationService notificationService;
     private final OrganizationService organizationService;
+    private final MeetingFileService meetingFileService;
 
     @PostMapping("/create/{projectID}")
     @Operation(summary = "스케쥴 생성 API", description = "스케쥴 생성 + 알림 생성 체크 시 프로젝트 내 멤버들에게 알림 생성")

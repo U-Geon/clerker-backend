@@ -71,7 +71,7 @@ jobs:
       - name: docker pull
         run: sudo docker pull ${{ secrets.DOCKER_USERNAME }}/clerker:latest
 
-      - name: docker stop container'
+      - name: docker stop container
         run: sudo docker stop clerker:latest || true
 
       - name: docker run new container

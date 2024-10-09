@@ -1,6 +1,7 @@
 package conference.clerker.domain.meeting.schema;
 
-import conference.clerker.domain.project.entity.Project;
+import conference.clerker.domain.meeting.dto.request.CreateMeetingRequestDTO;
+import conference.clerker.domain.project.schema.Project;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -21,6 +22,9 @@ public class Meeting {
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
+    private String url;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime startDate;
 
@@ -34,15 +38,13 @@ public class Meeting {
     @JoinColumn(name = "project_id")
     private Project project;
 
-    @Column(name = "url")
-    private String url;
-
-    public static Meeting create(Project project, String name, LocalDateTime startDate, Boolean isEnded) {
+    public static Meeting create(Project project, String name, String url, CreateMeetingRequestDTO requestDTO) {
         return Meeting.builder()
                 .name(name)
                 .project(project)
-                .startDate(startDate)
-                .isEnded(isEnded)
+                .url(url)
+                .startDate(requestDTO.startDate())
+                .isEnded(false)
                 .build();
     }
 }

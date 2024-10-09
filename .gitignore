@@ -36,4 +36,8 @@ out/
 ### VS Code ###
 .vscode/
 
+### application.yml 하위 폴더들 ###
 application-*.yml
+
+### Google Oauth ###
+credentials.json

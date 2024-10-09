@@ -38,6 +38,6 @@ public class MeetingService {
 
     // project ID를 통한 미팅 목록 조회
     public List<FindMeetingsDTO> findByProjectId(Long projectId) {
-        return meetingRepository.findByProjectId(projectId).stream().map(FindMeetingsDTO::new).toList();
+        return meetingRepository.findAllByProjectId(projectId).stream().map(FindMeetingsDTO::new).toList();
     }
 }

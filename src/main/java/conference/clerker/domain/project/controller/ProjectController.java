@@ -2,12 +2,14 @@ package conference.clerker.domain.project.controller;
 
 
 import conference.clerker.domain.member.schema.Member;
+import conference.clerker.domain.notification.service.NotificationService;
 import conference.clerker.domain.organization.dto.ProjectInfoDTO;
 import conference.clerker.domain.organization.service.OrganizationService;
 import conference.clerker.domain.project.dto.request.InviteMembersRequestDTO;
 import conference.clerker.domain.project.dto.request.UpdateProjectRequestDTO;
-import conference.clerker.domain.project.entity.Project;
+import conference.clerker.domain.project.schema.Project;
 import conference.clerker.domain.project.service.ProjectService;
+import conference.clerker.domain.schedule.service.ScheduleService;
 import conference.clerker.global.aop.roleCheck.RoleCheck;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -29,6 +31,8 @@ public class ProjectController {
 
     private final ProjectService projectService;
     private final OrganizationService organizationService;
+    private final ScheduleService scheduleService;
+    private final NotificationService notificationService;
 
     @PostMapping("/create")
     @Operation(summary = "프로젝트 생성", description = "프로젝트 생성 탭 클릭 시 요청. 토큰 필요")
@@ -38,8 +42,8 @@ public class ProjectController {
             @ApiResponse(responseCode = "AUTH-001", description = "사용자를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
     })
     public ResponseEntity<Void> createProject(@AuthenticationPrincipal Member member) {
-        Long id = projectService.createProject();
-        organizationService.createOwner(member.getId(), id);
+        Long projectId = projectService.createProject();
+        organizationService.createOwner(member.getId(), projectId);
         return ResponseEntity.noContent().build();
     }
 
@@ -94,9 +98,10 @@ public class ProjectController {
     public ResponseEntity<String> deleteProject(
             @Parameter(required = true, description = "프로젝트 Id" ,in = ParameterIn.PATH)
             @PathVariable("projectID") Long projectId) {
-        Boolean isDeletedMembers = organizationService.deleteMembers(projectId);
+        scheduleService.deleteAllScheduleByProjectId(projectId);
+        notificationService.deleteAllByProjectId(projectId);
         Boolean isDeletedProject = projectService.deleteById(projectId);
-        if(isDeletedProject && isDeletedMembers) {
+        if(isDeletedProject) {
             return ResponseEntity.noContent().build();
         } else {
             return ResponseEntity.internalServerError().body("{\"msg\" : \"project delete failed\"}");
@@ -138,6 +143,7 @@ public class ProjectController {
     }
 
     // 프로젝트 나가기
+    @RoleCheck(role = "MEMBER")
     @DeleteMapping("/{projectID}/out")
     @Operation(summary = "프로젝트 나가기", description = "방장만 내보낼 수 있음.")
     @ApiResponses(value = {

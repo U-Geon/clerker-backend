@@ -5,7 +5,7 @@ import conference.clerker.domain.member.repository.MemberRepository;
 import conference.clerker.domain.notification.dto.response.NotificationsResponseDTO;
 import conference.clerker.domain.notification.entity.Notification;
 import conference.clerker.domain.notification.repository.NotificationRepository;
-import conference.clerker.domain.project.entity.Project;
+import conference.clerker.domain.project.schema.Project;
 import conference.clerker.domain.project.repository.ProjectRepository;
 import conference.clerker.global.exception.ErrorCode;
 import conference.clerker.global.exception.domain.AuthException;
@@ -47,5 +47,10 @@ public class NotificationService {
     @Transactional
     public void delete(Long notificationId) {
         notificationRepository.deleteById(notificationId);
+    }
+
+    @Transactional
+    public void deleteAllByProjectId(Long projectId) {
+        notificationRepository.deleteAllByProjectId(projectId);
     }
 }

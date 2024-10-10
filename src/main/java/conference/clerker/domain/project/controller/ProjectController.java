@@ -1,7 +1,5 @@
 package conference.clerker.domain.project.controller;
 
-
-import conference.clerker.domain.member.schema.Member;
 import conference.clerker.domain.notification.service.NotificationService;
 import conference.clerker.domain.organization.dto.ProjectInfoDTO;
 import conference.clerker.domain.organization.service.OrganizationService;
@@ -11,6 +9,7 @@ import conference.clerker.domain.project.schema.Project;
 import conference.clerker.domain.project.service.ProjectService;
 import conference.clerker.domain.schedule.service.ScheduleService;
 import conference.clerker.global.aop.roleCheck.RoleCheck;
+import conference.clerker.global.oauth2.service.OAuth2UserPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -41,9 +40,9 @@ public class ProjectController {
             @ApiResponse(responseCode = "PROJECT-001", description = "프로젝트를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "AUTH-001", description = "사용자를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
     })
-    public ResponseEntity<Void> createProject(@AuthenticationPrincipal Member member) {
+    public ResponseEntity<Void> createProject(@AuthenticationPrincipal OAuth2UserPrincipal principal) {
         Long projectId = projectService.createProject();
-        organizationService.createOwner(member.getId(), projectId);
+        organizationService.createOwner(principal.getMember().getId(), projectId);
         return ResponseEntity.noContent().build();
     }
 
@@ -57,9 +56,9 @@ public class ProjectController {
     public ResponseEntity<Void> createProject(
             @Parameter(required = true, description = "부모 프로젝트 ID", in = ParameterIn.PATH)
             @PathVariable("projectID") Long projectId,
-            @AuthenticationPrincipal Member member) {
+            @AuthenticationPrincipal OAuth2UserPrincipal principal) {
         Long childProjectId = projectService.createChildProject(projectId);
-        organizationService.createOwner(member.getId(), childProjectId);
+        organizationService.createOwner(principal.getMember().getId(), childProjectId);
         return ResponseEntity.noContent().build();
     }
 
@@ -71,8 +70,8 @@ public class ProjectController {
             @ApiResponse(responseCode = "AUTH-001", description = "사용자를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
     })
     public ResponseEntity<List<Project>> getProjects(
-            @AuthenticationPrincipal Member member) {
-        return ResponseEntity.ok().body(organizationService.findProjectByMember(member.getId()));
+            @AuthenticationPrincipal OAuth2UserPrincipal principal) {
+        return ResponseEntity.ok().body(organizationService.findProjectByMember(principal.getMember().getId()));
     }
 
     @GetMapping("/{projectID}/info")
@@ -150,10 +149,10 @@ public class ProjectController {
             @ApiResponse(responseCode = "204", description = "성공", content = @Content(mediaType = "application/json")),
     })
     public ResponseEntity<Void> outOfProject(
-            @AuthenticationPrincipal Member member,
+            @AuthenticationPrincipal OAuth2UserPrincipal principal,
             @Parameter(required = true, description = "프로젝트 Id" ,in = ParameterIn.PATH)
             @PathVariable("projectID") Long projectId) {
-        organizationService.outOfProject(member.getId(), projectId);
+        organizationService.outOfProject(principal.getMember().getId(), projectId);
         return ResponseEntity.noContent().build();
     }
 

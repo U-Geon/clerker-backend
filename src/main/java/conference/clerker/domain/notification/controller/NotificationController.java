@@ -1,8 +1,8 @@
 package conference.clerker.domain.notification.controller;
 
-import conference.clerker.domain.member.schema.Member;
 import conference.clerker.domain.notification.dto.response.NotificationsResponseDTO;
 import conference.clerker.domain.notification.service.NotificationService;
+import conference.clerker.global.oauth2.service.OAuth2UserPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -29,8 +29,8 @@ public class NotificationController {
             @ApiResponse(responseCode = "200", description = "성공", content = @Content(mediaType = "application/json")),
     })
     public ResponseEntity<List<NotificationsResponseDTO>> findAll(
-            @AuthenticationPrincipal Member member) {
-        return ResponseEntity.ok().body(notificationService.findAllByMemberId(member.getId()));
+            @AuthenticationPrincipal OAuth2UserPrincipal principal) {
+        return ResponseEntity.ok().body(notificationService.findAllByMemberId(principal.getMember().getId()));
     }
 
     @DeleteMapping("/{notificationID}")

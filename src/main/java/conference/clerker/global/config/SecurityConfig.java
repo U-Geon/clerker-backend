@@ -4,9 +4,9 @@ import conference.clerker.global.jwt.JwtAuthenticationFilter; // JwtAuthenticati
 import conference.clerker.global.oauth2.handler.OAuth2AuthenticationFailureHandler;
 import conference.clerker.global.oauth2.handler.OAuth2AuthenticationSuccessHandler;
 import conference.clerker.global.oauth2.service.CustomOAuth2UserService;
+import conference.clerker.global.oauth2.util.CustomAuthorizationRequestResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -30,6 +30,7 @@ public class SecurityConfig {
     private final OAuth2AuthenticationSuccessHandler oauth2AuthenticationSuccessHandler;
     private final OAuth2AuthenticationFailureHandler oauth2AuthenticationFailureHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final CustomAuthorizationRequestResolver customAuthorizationRequestResolver;
 
 
     @Bean
@@ -55,6 +56,9 @@ public class SecurityConfig {
                 // Token 로그인 방식에서는 session 필요 없음.
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2Login(oauth2 -> oauth2
+                        .authorizationEndpoint(authorizationEndpointConfig -> authorizationEndpointConfig
+                                .authorizationRequestResolver(customAuthorizationRequestResolver)
+                        )
                         .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig.userService(customOAuth2UserService))
                         .successHandler(oauth2AuthenticationSuccessHandler)
                         .failureHandler(oauth2AuthenticationFailureHandler)

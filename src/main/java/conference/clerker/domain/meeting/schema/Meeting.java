@@ -23,7 +23,7 @@ public class Meeting {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String url;
 
     @Column(nullable = false, updatable = false)

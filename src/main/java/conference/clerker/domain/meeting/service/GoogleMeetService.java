@@ -5,10 +5,8 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.*;
-import conference.clerker.domain.meeting.schema.Meeting;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +20,6 @@ import org.springframework.stereotype.Service;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 
-import java.util.Arrays;
 
 @Slf4j
 @Service
@@ -42,6 +39,7 @@ public class GoogleMeetService {
 
         // SecurityContextHolder에 저장된 google access token 불러오기
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
         OAuth2AuthenticationToken oauth2Token = (OAuth2AuthenticationToken) authentication;
         OAuth2AuthorizedClient client = authorizedClientService.loadAuthorizedClient(
                 oauth2Token.getAuthorizedClientRegistrationId(),

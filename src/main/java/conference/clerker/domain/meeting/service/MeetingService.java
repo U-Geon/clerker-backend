@@ -9,6 +9,7 @@ import conference.clerker.domain.project.repository.ProjectRepository;
 import conference.clerker.domain.project.schema.Project;
 import conference.clerker.global.exception.ErrorCode;
 import conference.clerker.global.exception.domain.AuthException;
+import conference.clerker.global.exception.domain.MeetingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +31,7 @@ public class MeetingService {
         Project project = projectRepository.findById(projectId).orElseThrow(()
                 -> new AuthException(ErrorCode.PROJECT_NOT_FOUND));
 
-        String googlemeetUrl = googleMeetService.createMeeting(requestDTO.name(), requestDTO.startDate());
+        String googlemeetUrl = googleMeetService.createMeeting(requestDTO.name(), requestDTO.startDateTime());
 
         Meeting meeting = Meeting.create(project, requestDTO.name(), googlemeetUrl, requestDTO);
         meetingRepository.save(meeting);
@@ -39,5 +40,9 @@ public class MeetingService {
     // project ID를 통한 미팅 목록 조회
     public List<FindMeetingsDTO> findByProjectId(Long projectId) {
         return meetingRepository.findAllByProjectId(projectId).stream().map(FindMeetingsDTO::new).toList();
+    }
+
+    public Meeting findById(Long id) {
+        return meetingRepository.findById(id).orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUND));
     }
 }

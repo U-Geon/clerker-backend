@@ -14,7 +14,7 @@ public class MeetingFile {
     @Column(updatable = false, nullable = false, name = "meeting_file_id")
     private Long id;
 
-    @Column(name = "url")
+    @Column(name = "url", columnDefinition = "TEXT")
     private String url;
 
     @Column(name = "filename")

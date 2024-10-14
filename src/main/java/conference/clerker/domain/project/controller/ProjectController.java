@@ -5,7 +5,7 @@ import conference.clerker.domain.organization.dto.ProjectInfoDTO;
 import conference.clerker.domain.organization.service.OrganizationService;
 import conference.clerker.domain.project.dto.request.InviteMembersRequestDTO;
 import conference.clerker.domain.project.dto.request.UpdateProjectRequestDTO;
-import conference.clerker.domain.project.schema.Project;
+import conference.clerker.domain.project.dto.response.ProjectWithMeetingsDTO;
 import conference.clerker.domain.project.service.ProjectService;
 import conference.clerker.domain.schedule.service.ScheduleService;
 import conference.clerker.global.aop.roleCheck.RoleCheck;
@@ -69,7 +69,7 @@ public class ProjectController {
             @ApiResponse(responseCode = "PROJECT-001", description = "프로젝트를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "AUTH-001", description = "사용자를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
     })
-    public ResponseEntity<List<Project>> getProjects(
+    public ResponseEntity<List<ProjectWithMeetingsDTO>> getProjects(
             @AuthenticationPrincipal OAuth2UserPrincipal principal) {
         return ResponseEntity.ok().body(organizationService.findProjectByMember(principal.getMember().getId()));
     }

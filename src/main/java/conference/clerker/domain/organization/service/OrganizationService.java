@@ -9,6 +9,7 @@ import conference.clerker.domain.organization.schema.Organization;
 import conference.clerker.domain.organization.schema.Role;
 import conference.clerker.domain.organization.repository.OrganizationRepository;
 import conference.clerker.domain.project.dto.request.UpdateProjectRequestDTO;
+import conference.clerker.domain.project.dto.response.ProjectWithMeetingsDTO;
 import conference.clerker.domain.project.schema.Project;
 import conference.clerker.domain.project.repository.ProjectRepository;
 import conference.clerker.global.exception.ErrorCode;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -59,8 +61,11 @@ public class OrganizationService {
     }
 
     // 특정 회원의 전체 프로젝트 목록
-    public List<Project> findProjectByMember(Long memberId) {
-        return organizationRepository.findProjectsByMemberId(memberId);
+    public List<ProjectWithMeetingsDTO> findProjectByMember(Long memberId) {
+        List<Project> projects = organizationRepository.findProjectsWithEndedMeetingsByMemberId(memberId);
+        return projects.stream()
+                .map(ProjectWithMeetingsDTO::new)
+                .collect(Collectors.toList());
     }
 
     // 프로젝트 이름 + 소속 멤버들 정보

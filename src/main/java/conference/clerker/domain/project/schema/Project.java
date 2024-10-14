@@ -1,6 +1,7 @@
 package conference.clerker.domain.project.schema;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import conference.clerker.domain.meeting.schema.Meeting;
 import conference.clerker.domain.organization.schema.Organization;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
@@ -35,6 +36,9 @@ public class Project {
     @OneToMany(mappedBy = "project", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @JsonIgnore
     private List<Organization> organizations = new ArrayList<>();
+
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Meeting> meetings = new ArrayList<>();
 
     public static Project create() {
         return Project.builder()

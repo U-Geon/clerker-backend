@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
-    private final OrganizationService organizationService;
 
     // 프로젝트 생성
     @Transactional

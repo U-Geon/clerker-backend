@@ -60,7 +60,7 @@ public class OrganizationService {
 
     // 특정 회원의 전체 프로젝트 목록
     public List<Project> findProjectByMember(Long memberId) {
-        return organizationRepository.findProjectsByMemberId(memberId);
+        return organizationRepository.findProjectsWithMeetingsByMemberId(memberId);
     }
 
     // 프로젝트 이름 + 소속 멤버들 정보

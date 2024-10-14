@@ -31,9 +31,11 @@ public class MeetingService {
         Project project = projectRepository.findById(projectId).orElseThrow(()
                 -> new AuthException(ErrorCode.PROJECT_NOT_FOUND));
 
-        String googlemeetUrl = googleMeetService.createMeeting(requestDTO.name(), requestDTO.startDateTime());
+        String googleMeetUrl = googleMeetService.createMeeting(requestDTO.name(), requestDTO.startDateTime());
 
-        Meeting meeting = Meeting.create(project, requestDTO.name(), googlemeetUrl, requestDTO);
+        Meeting meeting = Meeting.create(project, requestDTO.name(), googleMeetUrl, requestDTO);
+        meeting.setProject(project);
+        project.getMeetings().add(meeting);
         meetingRepository.save(meeting);
     }
 

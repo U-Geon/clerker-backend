@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface ScheduleTimeRepository extends JpaRepository<ScheduleTime, Long> {
     @Query("SELECT new conference.clerker.domain.schedule.dto.response.ScheduleTimeWithMemberInfoDTO(" +
-            "st, m.username, m.email, o.type) " +
+            "st, m.username, m.email, o.type, o.role) " +
             "FROM ScheduleTime st " +
             "JOIN Organization o ON o.member.id = st.memberId " +
             "JOIN Member m ON m.id = o.member.id " +

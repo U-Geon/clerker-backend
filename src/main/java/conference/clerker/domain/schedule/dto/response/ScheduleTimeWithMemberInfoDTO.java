@@ -1,5 +1,6 @@
 package conference.clerker.domain.schedule.dto.response;
 
+import conference.clerker.domain.organization.schema.Role;
 import conference.clerker.domain.schedule.schema.ScheduleTime;
 import conference.clerker.domain.schedule.schema.TimeTable;
 
@@ -9,14 +10,16 @@ public record ScheduleTimeWithMemberInfoDTO(
         List<TimeTableDTO> timeTables,
         String username,
         String email,
-        String type
+        String type,
+        String role
 ) {
-    public ScheduleTimeWithMemberInfoDTO(ScheduleTime st, String username, String email, String type) {
+    public ScheduleTimeWithMemberInfoDTO(ScheduleTime st, String username, String email, String type, Role role) {
         this(
                 st.getTimeTables().stream().map(TimeTableDTO::new).toList(),
                 username,
                 email,
-                type
+                type,
+                role.toString()
         );
     }
 }

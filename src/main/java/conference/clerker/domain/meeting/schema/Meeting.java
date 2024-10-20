@@ -1,5 +1,7 @@
 package conference.clerker.domain.meeting.schema;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import conference.clerker.domain.meeting.dto.request.CreateMeetingRequestDTO;
 import conference.clerker.domain.project.schema.Project;
 import jakarta.persistence.*;
 import lombok.*;
@@ -21,6 +23,9 @@ public class Meeting {
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String url;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime startDate;
 
@@ -32,14 +37,17 @@ public class Meeting {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id")
+    @JsonIgnore
     private Project project;
 
-    public static Meeting create(Project project, String name, LocalDateTime startDate, Boolean isEnded) {
+    public static Meeting create(Project project, String name, String url, CreateMeetingRequestDTO requestDTO) {
         return Meeting.builder()
                 .name(name)
                 .project(project)
-                .startDate(startDate)
-                .isEnded(isEnded)
+                .url(url)
+                .startDate(requestDTO.startDateTime())
+                .isEnded(false)
+                .createdAt(LocalDateTime.now())
                 .build();
     }
 }

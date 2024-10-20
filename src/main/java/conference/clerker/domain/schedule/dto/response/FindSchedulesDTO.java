@@ -6,7 +6,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 public record FindSchedulesDTO(
-        Long id,
+        Long scheduleId,
+        String scheduleName,
         LocalDate startDate, // 연 월 일
         LocalDate endDate,
         LocalTime startTime, // 시 분 초
@@ -17,6 +18,7 @@ public record FindSchedulesDTO(
     public FindSchedulesDTO(Schedule schedule) {
         this(
                 schedule.getId(),
+                schedule.getName(),
                 schedule.getStartDate(),
                 schedule.getEndDate(),
                 schedule.getStartTime(),

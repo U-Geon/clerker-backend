@@ -13,8 +13,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface OrganizationRepository extends JpaRepository<Organization, Long> {
-    @Query("SELECT o.project FROM Organization o WHERE o.member.id = :memberId AND o.project.parentProject IS NULL")
-    List<Project> findProjectsByMemberId(@Param("memberId") Long memberId);
+    @Query("SELECT DISTINCT o.project FROM Organization o " +
+            "LEFT JOIN FETCH o.project.meetings m " +
+            "WHERE o.member.id = :memberId AND o.project.parentProject IS NULL")
+    List<Project> findProjectsWithEndedMeetingsByMemberId(@Param("memberId") Long memberId);
 
     @Query("SELECT new conference.clerker.domain.organization.dto.MemberInfoDTO(o.id, o.member.username, o.member.email, o.role, o.type) " +
             "FROM Organization o WHERE o.project.id = :projectId")

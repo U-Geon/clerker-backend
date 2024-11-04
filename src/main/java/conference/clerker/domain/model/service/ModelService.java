@@ -4,12 +4,7 @@ import com.amazonaws.util.IOUtils;
 import conference.clerker.domain.model.dto.request.ModelRequestDTO;
 import conference.clerker.domain.model.dto.response.ModelResponseDTO;
 import conference.clerker.global.aws.s3.S3FileService;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,43 +49,42 @@ public class ModelService {
                     .bodyToMono(ModelResponseDTO.class)
                     .doFinally(signalType -> closeMp3File(mp3File));
         } catch (IOException e) {
+            log.error("파일 변환 중 IO 에러 발생: {}", e.getMessage());
             return Mono.error(new IllegalStateException("파일 변환 중 IO 에러 발생: " + e.getMessage(), e));
-        } catch (InterruptedException e) {
-            return Mono.error(new IllegalStateException("파일 변환 중 인터럽트 발생: " + e.getMessage(), e));
         } catch (Exception e) {
-            return Mono.error(e);
+            log.error("예기치 않은 에러 발생: {}", e.getMessage());
+            return Mono.error(new IllegalStateException("예기치 않은 에러 발생: " + e.getMessage(), e));
         }
     }
 
-    public String test1(MultipartFile webmFile) {
-        // 1. MultipartFile이 비어 있는지 확인
-        if (webmFile == null || webmFile.isEmpty()) {
-            throw new IllegalArgumentException("업로드된 파일이 없습니다.");
-        }
+//    public String test1(MultipartFile webmFile) {
+//        if (webmFile == null || webmFile.isEmpty()) {
+//            log.error("업로드된 파일이 없습니다.");
+//            throw new IllegalArgumentException("업로드된 파일이 없습니다.");
+//        }
+//
+//        try {
+//            MultipartFile mp3File = convertWebmToMp3(webmFile);
+//            return s3FileService.uploadFile("mp3File", mp3File.getOriginalFilename(), mp3File);
+//        } catch (IOException e) {
+//            log.error("파일 변환 중 IO 에러 발생: {}", e.getMessage());
+//            throw new RuntimeException("파일 변환 중 IO 에러 발생: " + e.getMessage(), e);
+//        } catch (Exception e) {
+//            log.error("예기치 않은 에러 발생: {}", e.getMessage());
+//            throw new RuntimeException("예기치 않은 에러 발생: " + e.getMessage(), e);
+//        }
+//    }
 
-        try {
-            MultipartFile multipartFile = convertWebmToMp3(webmFile);
-            return s3FileService.uploadFile("mp3File", multipartFile.getOriginalFilename(), multipartFile);
-        } catch (IOException e) {
-            throw new RuntimeException("파일 변환 중 IO 에러 발생: " + e.getMessage(), e);
-        } catch (InterruptedException e) {
-            throw new RuntimeException("파일 변환 중 인터럽트 발생: " + e.getMessage(), e);
-        }
-    }
-
-    private MultipartFile convertWebmToMp3(MultipartFile webmFile) throws IOException, InterruptedException {
+    private MultipartFile convertWebmToMp3(MultipartFile webmFile) {
         File tempWebmFile = null;
         File mp3File = null;
 
         try {
-            // 임시 .webm 파일 생성
             tempWebmFile = File.createTempFile("temp", ".webm");
             webmFile.transferTo(tempWebmFile);
 
-            // 변환될 MP3 파일 경로 설정
             mp3File = new File(tempWebmFile.getAbsolutePath().replace(".webm", ".mp3"));
 
-            // FFmpeg 명령어 실행
             ProcessBuilder processBuilder = new ProcessBuilder(
                     "/opt/homebrew/bin/ffmpeg",
                     "-i", tempWebmFile.getAbsolutePath(),
@@ -101,17 +95,18 @@ public class ModelService {
             );
             Process process = processBuilder.start();
 
-            // FFmpeg 프로세스 완료 대기
             int exitCode = process.waitFor();
             if (exitCode != 0) {
+                log.error("FFmpeg 실행 실패: exit code {}", exitCode);
                 throw new IOException("FFmpeg 실행 실패: exit code " + exitCode);
             }
 
-            // MP3 파일을 바이트 배열로 읽어 MultipartFile 생성
             byte[] mp3Bytes = IOUtils.toByteArray(new FileInputStream(mp3File));
             return createMultipartFile(mp3File, mp3Bytes);
+        } catch (IOException | InterruptedException e) {
+            log.error("파일 변환 실패: {}", e.getMessage());
+            throw new RuntimeException("파일 변환 실패: " + e.getMessage(), e);
         } finally {
-            // 임시 파일 삭제
             cleanUpTempFiles(tempWebmFile, mp3File);
         }
     }
@@ -149,7 +144,7 @@ public class ModelService {
             }
 
             @Override
-            public InputStream getInputStream() throws IOException {
+            public InputStream getInputStream() {
                 return new ByteArrayInputStream(mp3Bytes);
             }
 

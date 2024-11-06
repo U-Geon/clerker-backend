@@ -112,6 +112,7 @@ public class ModelService {
         }
     }
 
+    // mp3File 타입을 File에서 MultipartFile로 변경하는 로직.
     private MultipartFile createMultipartFile(File mp3File, byte[] mp3Bytes) {
         return new MultipartFile() {
             @Override
@@ -158,6 +159,7 @@ public class ModelService {
         };
     }
 
+    // mp3로 변환하면서 생기는 임시 파일 삭제
     private void cleanUpTempFiles(File tempWebmFile, File mp3File) {
         if (tempWebmFile != null && tempWebmFile.exists() && !tempWebmFile.delete()) {
             log.error("임시 webm 파일 삭제 실패: {}", tempWebmFile.getAbsolutePath());
@@ -167,6 +169,7 @@ public class ModelService {
         }
     }
 
+    // s3 업로드 후 로컬 환경에 설치되는 mp3 파일 삭제
     private void closeMp3File(MultipartFile mp3File) {
         try {
             if (mp3File != null && mp3File.getInputStream() != null) {

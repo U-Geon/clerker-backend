@@ -56,7 +56,7 @@ public class ModelService {
             return Mono.error(new IllegalStateException("예기치 않은 에러 발생: " + e.getMessage(), e));
         }
     }
-
+      // webm to mp3 이후 s3에 저장하는 로직 테스트
 //    public String test1(MultipartFile webmFile) {
 //        if (webmFile == null || webmFile.isEmpty()) {
 //            log.error("업로드된 파일이 없습니다.");
@@ -85,6 +85,7 @@ public class ModelService {
 
             mp3File = new File(tempWebmFile.getAbsolutePath().replace(".webm", ".mp3"));
 
+            // 추후에 해당 저장 경로를 인스턴스 내 ffmpeg 라이브러리 설치 경로로 변경
             ProcessBuilder processBuilder = new ProcessBuilder(
                     "/opt/homebrew/bin/ffmpeg",
                     "-i", tempWebmFile.getAbsolutePath(),

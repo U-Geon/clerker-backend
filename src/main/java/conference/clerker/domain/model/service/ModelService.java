@@ -1,6 +1,9 @@
 package conference.clerker.domain.model.service;
 
 import com.amazonaws.util.IOUtils;
+import conference.clerker.domain.meeting.schema.Meeting;
+import conference.clerker.domain.meeting.schema.MeetingFile;
+import conference.clerker.domain.meeting.service.MeetingService;
 import conference.clerker.domain.model.dto.request.ModelRequestDTO;
 import conference.clerker.domain.model.dto.response.ModelResponseDTO;
 import conference.clerker.global.aws.s3.S3FileService;
@@ -27,9 +30,10 @@ public class ModelService {
 
     private final WebClient.Builder webClientBuilder;
     private final S3FileService s3FileService;
+    private final MeetingService meetingService;
 
     @Transactional
-    public Mono<ModelResponseDTO> sendToModelServer(List<String> keywords, MultipartFile webmFile) {
+    public Mono<ModelResponseDTO> sendToModelServer(List<String> keywords, MultipartFile webmFile, Long meetingId) {
         try {
             // 1. webm 파일을 mp3로 변환
             MultipartFile mp3File = convertWebmToMp3(webmFile);
@@ -47,6 +51,7 @@ public class ModelService {
                     .body(BodyInserters.fromValue(modelRequestDTO))
                     .retrieve()
                     .bodyToMono(ModelResponseDTO.class)
+                    .doOnNext(this::processModelResponse) // 받은 ModelResponseDTO를 통한 로직 실행.
                     .doFinally(signalType -> closeMp3File(mp3File));
         } catch (IOException e) {
             log.error("파일 변환 중 IO 에러 발생: {}", e.getMessage());
@@ -56,7 +61,14 @@ public class ModelService {
             return Mono.error(new IllegalStateException("예기치 않은 에러 발생: " + e.getMessage(), e));
         }
     }
-      // webm to mp3 이후 s3에 저장하는 로직 테스트
+
+    // 받은 ModelResponseDTO를 통한 로직 실행.
+    private void processModelResponse(ModelResponseDTO modelResponseDTO, Long meetingId) {
+        // 여기서 받은 파일들을 토대로 s3 업로드 후 MeetingFile 엔티티 생성 및 저장 ㄱㄱ
+    }
+
+
+    // webm to mp3 이후 s3에 저장하는 로직 테스트
 //    public String test1(MultipartFile webmFile) {
 //        if (webmFile == null || webmFile.isEmpty()) {
 //            log.error("업로드된 파일이 없습니다.");

@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,9 +35,12 @@ public class ModelController {
             @Valid @RequestPart("keywords") List<String> keywords,
 
             @Parameter(description = ".webm 형식의 녹화 파일", required = true, content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE))
-            @Valid @RequestPart("webmFile") MultipartFile webmFile
+            @Valid @RequestPart("webmFile") MultipartFile webmFile,
+
+            @Parameter(description = "meeting ID", required = true)
+            @Valid @RequestParam(value = "meetingId", required = true) Long meetingId
     ) {
-        return modelService.sendToModelServer(keywords, webmFile)
+        return modelService.sendToModelServer(keywords, webmFile, meetingId)
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));
     }

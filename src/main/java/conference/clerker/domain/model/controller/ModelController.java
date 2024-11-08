@@ -31,16 +31,16 @@ public class ModelController {
             description = ".webm 파일을 mp3로 변환 후 S3에 저장. 모델에 S3 url과 주제 도메인 전송"
     )
     public Mono<ResponseEntity<ModelResponseDTO>> endRecording(
-            @Parameter(description = "주제 도메인 목록", required = true, example = "[\"Front-end\", \"Back-End\"]")
-            @Valid @RequestPart("keywords") List<String> keywords,
+            @Parameter(description = "주제 도메인", required = true, example = "\"Front-end\"")
+            @Valid @RequestPart("domain") String domain,
 
             @Parameter(description = ".webm 형식의 녹화 파일", required = true, content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE))
             @Valid @RequestPart("webmFile") MultipartFile webmFile,
 
             @Parameter(description = "meeting ID", required = true)
-            @Valid @RequestParam(value = "meetingId", required = true) Long meetingId
+            @Valid @RequestParam(value = "meetingId") Long meetingId
     ) {
-        return modelService.sendToModelServer(keywords, webmFile, meetingId)
+        return modelService.sendToModelServer(domain, webmFile, meetingId)
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));
     }

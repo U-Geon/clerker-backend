@@ -1,8 +1,8 @@
 package conference.clerker.domain.model.service;
 
 import com.amazonaws.util.IOUtils;
-import conference.clerker.domain.meeting.schema.Meeting;
-import conference.clerker.domain.meeting.schema.MeetingFile;
+import conference.clerker.domain.meeting.schema.FileType;
+import conference.clerker.domain.meeting.service.MeetingFileService;
 import conference.clerker.domain.meeting.service.MeetingService;
 import conference.clerker.domain.model.dto.request.ModelRequestDTO;
 import conference.clerker.domain.model.dto.response.ModelResponseDTO;
@@ -25,6 +25,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class ModelService {
 
+    private final MeetingFileService meetingFileService;
     @Value("${baseUrl.model}")
     private String baseUrl;
 
@@ -33,7 +34,7 @@ public class ModelService {
     private final MeetingService meetingService;
 
     @Transactional
-    public Mono<ModelResponseDTO> sendToModelServer(List<String> keywords, MultipartFile webmFile, Long meetingId) {
+    public Mono<ModelResponseDTO> sendToModelServer(String domain, MultipartFile webmFile, Long meetingId) {
         try {
             // 1. webm 파일을 mp3로 변환
             MultipartFile mp3File = convertWebmToMp3(webmFile);
@@ -43,7 +44,7 @@ public class ModelService {
 
             // 3. 모델 서버에 전송할 DTO 생성
             WebClient webClient = webClientBuilder.baseUrl(baseUrl).build();
-            ModelRequestDTO modelRequestDTO = new ModelRequestDTO(keywords, mp3FileUrl);
+            ModelRequestDTO modelRequestDTO = new ModelRequestDTO(domain, mp3FileUrl);
 
             // 4. WebClient를 사용하여 모델 서버에 요청 보내기
             return webClient.post()
@@ -51,7 +52,7 @@ public class ModelService {
                     .body(BodyInserters.fromValue(modelRequestDTO))
                     .retrieve()
                     .bodyToMono(ModelResponseDTO.class)
-                    .doOnNext(this::processModelResponse) // 받은 ModelResponseDTO를 통한 로직 실행.
+                    .doOnNext(response -> processModelResponse(response, meetingId)) // 받은 ModelResponseDTO를 통한 로직 실행.
                     .doFinally(signalType -> closeMp3File(mp3File));
         } catch (IOException e) {
             log.error("파일 변환 중 IO 에러 발생: {}", e.getMessage());
@@ -63,8 +64,28 @@ public class ModelService {
     }
 
     // 받은 ModelResponseDTO를 통한 로직 실행.
-    private void processModelResponse(ModelResponseDTO modelResponseDTO, Long meetingId) {
-        // 여기서 받은 파일들을 토대로 s3 업로드 후 MeetingFile 엔티티 생성 및 저장 ㄱㄱ
+    private void processModelResponse(ModelResponseDTO response, Long meetingId) {
+        // 여기서 받은 url들을 토대로 파일을 s3에 저장한 뒤 DB에 버킷 경로 저장
+        try {
+            // zip 파일 압축 해제 후 이미지 업로드
+            //TODO 파일 경로 지정 수정 필요
+            List<String> imageUrls = s3FileService.transferZipContentFromOtherS3("bucketName", response.images(), "images");
+            for (String imageUrl : imageUrls) meetingFileService.create(meetingId, FileType.IMAGE, imageUrl);
+
+            //보고서
+            //TODO 파일 경로 지정 수정 필요
+            String reportUrl = s3FileService.transferFileFromOtherS3("bucketName", response.report(), "report");
+            meetingFileService.create(meetingId, FileType.REPORT, reportUrl);
+
+            //원문
+            //TODO 파일 경로 지정 수정 필요
+            String sttUrl = s3FileService.transferFileFromOtherS3("bucketName", response.stt(), "stt");
+            meetingFileService.create(meetingId, FileType.STT_RAW, sttUrl);
+
+        } catch (Exception e){
+            log.error("파일 다운 중 에러 발생: {}", e.getMessage());
+        }
+
     }
 
 
@@ -184,7 +205,8 @@ public class ModelService {
     // s3 업로드 후 로컬 환경에 설치되는 mp3 파일 삭제
     private void closeMp3File(MultipartFile mp3File) {
         try {
-            if (mp3File != null && mp3File.getInputStream() != null) {
+            if (mp3File != null) {
+                mp3File.getInputStream();
                 mp3File.getInputStream().close();
             }
         } catch (IOException e) {

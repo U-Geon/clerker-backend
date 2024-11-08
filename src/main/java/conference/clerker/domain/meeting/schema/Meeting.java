@@ -20,15 +20,19 @@ public class Meeting {
     @Column(updatable = false, nullable = false, name = "meeting_id")
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(name = "domain")
+    private String domain;
+
+    @Column(name = "url", nullable = false, columnDefinition = "TEXT")
     private String url;
 
-    @Column(nullable = false, updatable = false)
+    @Column(name = "start_date", nullable = false, updatable = false)
     private LocalDateTime startDate;
 
+    @Column(name = "is_ended", nullable = false)
     private Boolean isEnded;
 
     @CreatedDate
@@ -43,6 +47,7 @@ public class Meeting {
     public static Meeting create(Project project, String name, String url, CreateMeetingRequestDTO requestDTO) {
         return Meeting.builder()
                 .name(name)
+                .domain(requestDTO.domain())
                 .project(project)
                 .url(url)
                 .startDate(requestDTO.startDateTime())

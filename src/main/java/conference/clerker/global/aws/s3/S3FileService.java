@@ -1,7 +1,6 @@
 package conference.clerker.global.aws.s3;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import conference.clerker.global.aws.AwsProperty;
@@ -20,21 +19,27 @@ public class S3FileService {
     private final AmazonS3 amazonS3;
 
     // 파일 업로드
-    public String uploadFile(String key, MultipartFile file) throws IOException {
-        ObjectMetadata objectMetadata = new ObjectMetadata();
-        objectMetadata.setContentType(file.getContentType());
-        objectMetadata.setContentLength(file.getSize());
+    public String uploadFile(String folderPath, String fileName, MultipartFile file) {
+        try {
+            ObjectMetadata objectMetadata = new ObjectMetadata();
+            objectMetadata.setContentType(file.getContentType());
+            objectMetadata.setContentLength(file.getSize());
 
-        return uploadFile(key, file.getInputStream(), objectMetadata);
+            // 폴더 경로를 포함하여 key 생성
+            String key = folderPath + "/" + fileName;
+            return uploadFile(key, file.getInputStream(), objectMetadata);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public String uploadFile(String key, InputStream inputStream, ObjectMetadata objectMetadata) {
+    private String uploadFile(String key, InputStream inputStream, ObjectMetadata objectMetadata) {
         PutObjectRequest putObjectRequest = new PutObjectRequest(
                 awsProperty.getS3().getBucket(),
                 key,
                 inputStream,
                 objectMetadata
-        ).withCannedAcl(CannedAccessControlList.PublicRead);
+        );
 
         amazonS3.putObject(putObjectRequest);
 

@@ -41,9 +41,5 @@ public class AuthService {
         profileRepository.save(profile);
     }
 
-    @Transactional
-    public void logout(Long memberId, @NotBlank String accessToken) {
-        jwtProvider.
-    }
 
 }

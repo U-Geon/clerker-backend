@@ -147,7 +147,6 @@ public class S3FileService {
         }
     }
 
-
     // 파일 삭제
     public void deleteFile(String key) {
         amazonS3.deleteObject(awsProperty.getS3().getBucket(), key);

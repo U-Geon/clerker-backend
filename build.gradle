@@ -39,7 +39,6 @@ dependencies {
 	implementation 'software.amazon.awssdk:s3:2.28.29'
 	implementation 'software.amazon.awssdk:sts:2.28.29'
 
-
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'com.mysql:mysql-connector-j'

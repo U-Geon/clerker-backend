@@ -1,11 +1,8 @@
 package conference.clerker.domain.project.service;
 
-import conference.clerker.domain.notification.service.NotificationService;
-import conference.clerker.domain.organization.service.OrganizationService;
 import conference.clerker.domain.project.dto.request.UpdateProjectRequestDTO;
 import conference.clerker.domain.project.schema.Project;
 import conference.clerker.domain.project.repository.ProjectRepository;
-import conference.clerker.domain.schedule.service.ScheduleService;
 import conference.clerker.global.exception.ErrorCode;
 import conference.clerker.global.exception.domain.ProjectException;
 import lombok.RequiredArgsConstructor;

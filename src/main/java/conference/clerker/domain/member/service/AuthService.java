@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+
 import static conference.clerker.global.exception.ErrorCode.MEMBER_NOT_FOUND;
 
 @Service
@@ -29,16 +31,20 @@ public class AuthService {
 
     @Transactional
     public void update(Long memberId, @Valid MultipartFile profileImage, @Valid String username) {
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> new AuthException(MEMBER_NOT_FOUND));
+        try {
+            Member member = memberRepository.findById(memberId).orElseThrow(() -> new AuthException(MEMBER_NOT_FOUND));
 
-        // JPA dirty checking
-        member.setUsername(username);
+            // JPA dirty checking
+            member.setUsername(username);
 
-        String filename = profileImage.getOriginalFilename();
-        String profileURL = s3FileService.uploadFile("profile", filename, profileImage);
+            String filename = profileImage.getOriginalFilename();
+            String profileURL = s3FileService.uploadFile("profile", filename, profileImage);
 
-        Profile profile = Profile.create(member, profileURL, filename);
-        profileRepository.save(profile);
+            Profile profile = Profile.create(member, profileURL, filename);
+            profileRepository.save(profile);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 

@@ -1,40 +1,47 @@
 package conference.clerker.global.config;
 
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-import io.swagger.v3.oas.annotations.info.Info;
-import io.swagger.v3.oas.annotations.servers.Server;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-@OpenAPIDefinition(
-        info = @Info(
-                title = "Clerker",
-                description = "D & X : W Conference Project - 회의 지원 플랫폼",
-                version = "v1"
-        ),
-        servers = {
-            @Server(url="http://localhost:8080", description = "로컬 서버")
-        }
-)
 
 @Configuration
 public class SwaggerConfig {
 
+    @Value("${baseUrl.server}")
+    private String serverUrl;
+
     @Bean
     public OpenAPI openAPI() {
         SecurityRequirement securityRequirement = new SecurityRequirement().addList("JWT");
-        Components components = new Components().addSecuritySchemes("JWT", new SecurityScheme()
-                .name("JWT")
-                .type(SecurityScheme.Type.HTTP)
-                .scheme("bearer")
-                .bearerFormat("JWT")
-        );
+
+        Components components = new Components()
+                .addSecuritySchemes("JWT", new SecurityScheme()
+                        .type(SecurityScheme.Type.HTTP)
+                        .scheme("bearer")
+                        .bearerFormat("JWT")
+                );
+
+        Server localServer = new Server()
+                .url("http://127.0.0.1:8080")
+                .description("로컬 서버");
+
+        Server deployServer = new Server()
+                .url(serverUrl)
+                .description("배포 서버");
+
         return new OpenAPI()
-                .components(new Components())
+                .info(new Info()
+                        .title("Clerker")
+                        .description("D & X : W Conference Project - 회의 지원 플랫폼")
+                        .version("v1"))
+                .addServersItem(localServer)
+                .addServersItem(deployServer)
                 .addSecurityItem(securityRequirement)
                 .components(components);
     }

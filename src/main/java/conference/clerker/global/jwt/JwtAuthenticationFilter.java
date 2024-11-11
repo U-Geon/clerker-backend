@@ -2,7 +2,6 @@ package conference.clerker.global.jwt;
 
 import conference.clerker.domain.member.repository.MemberRepository;
 import conference.clerker.domain.member.schema.Member;
-import conference.clerker.global.oauth2.service.CustomUserDetailsService;
 import conference.clerker.global.oauth2.service.OAuth2UserPrincipal;
 import conference.clerker.global.oauth2.user.GoogleOAuth2UserInfo;
 import conference.clerker.global.oauth2.util.CustomOAuth2AuthenticationToken;
@@ -11,7 +10,6 @@ import jakarta.servlet.ServletException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import jakarta.servlet.FilterChain;
@@ -26,7 +24,6 @@ import java.util.Map;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
-    private final CustomUserDetailsService customUserDetailsService;  // CustomUserDetails Service가 주입됩니다.
     private final MemberRepository memberRepository;
 
     @Override
@@ -37,12 +34,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (jwt != null && jwtProvider.validateToken(jwt)) {
                 String email = jwtProvider.getEmailFromToken(jwt);
 
-                UserDetails userDetails = customUserDetailsService.loadUserByUsername(email); // 사용자 정보 가져오기
-                if (userDetails != null) {
-                    Authentication authentication = getOAuth2Authentication(email);
-                    // 인증 정보 설정
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                }
+                Authentication authentication = getOAuth2Authentication(email);
+                // 인증 정보 설정
+                SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (ExpiredJwtException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -72,7 +66,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         attributes.put("name", member.getUsername());
         // 필요한 추가 속성 설정
         GoogleOAuth2UserInfo googleOAuth2UserInfo = new GoogleOAuth2UserInfo(attributes);
-
 
         // OAuth2UserPrincipal 생성
         OAuth2UserPrincipal oauth2User = new OAuth2UserPrincipal(googleOAuth2UserInfo, member);

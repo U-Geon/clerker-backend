@@ -3,7 +3,6 @@ package conference.clerker.global.oauth2.handler;
 import conference.clerker.domain.member.schema.Member;
 import conference.clerker.global.jwt.JwtProvider;
 import conference.clerker.global.oauth2.service.OAuth2UserPrincipal;
-import conference.clerker.global.oauth2.user.OAuth2UserUnlinkManager;
 
 
 import lombok.RequiredArgsConstructor;
@@ -26,7 +25,6 @@ import java.util.Map;
 @Component
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    private final OAuth2UserUnlinkManager oAuth2UserUnlinkManager;
     private final JwtProvider jwtProvider;
 
 
@@ -64,7 +62,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         String accessToken = jwtProvider.generateToken(claims);
 
         return UriComponentsBuilder.fromUriString(targetUrl)
-                .queryParam("accessToken", accessToken)
+                .queryParam("token", accessToken)
                 .build().toUriString();
     }
 }

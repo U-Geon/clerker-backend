@@ -5,7 +5,7 @@ import conference.clerker.domain.organization.dto.ProjectInfoDTO;
 import conference.clerker.domain.organization.service.OrganizationService;
 import conference.clerker.domain.project.dto.request.InviteMembersRequestDTO;
 import conference.clerker.domain.project.dto.request.UpdateProjectRequestDTO;
-import conference.clerker.domain.project.schema.Project;
+import conference.clerker.domain.project.dto.response.ProjectWithMeetingsDTO;
 import conference.clerker.domain.project.service.ProjectService;
 import conference.clerker.domain.schedule.service.ScheduleService;
 import conference.clerker.global.aop.roleCheck.RoleCheck;
@@ -48,11 +48,6 @@ public class ProjectController {
 
     @PostMapping("/{projectID}/create-child")
     @Operation(summary = "하위 프로젝트 생성", description = "하위 프로젝트 생성 탭 클릭 시 요청. 토큰 필요")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "성공", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "PROJECT-001", description = "프로젝트를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "AUTH-001", description = "사용자를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
-    })
     public ResponseEntity<Void> createProject(
             @Parameter(required = true, description = "부모 프로젝트 ID", in = ParameterIn.PATH)
             @PathVariable("projectID") Long projectId,
@@ -64,22 +59,13 @@ public class ProjectController {
 
     @GetMapping
     @Operation(summary = "프로젝트 목록 조회", description = "특정 회원의 전체적인 프로젝트 목록을 조회하는 API. 토큰 정보 필요")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "PROJECT-001", description = "프로젝트를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "AUTH-001", description = "사용자를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
-    })
-    public ResponseEntity<List<Project>> getProjects(
+    public ResponseEntity<List<ProjectWithMeetingsDTO>> getProjects(
             @AuthenticationPrincipal OAuth2UserPrincipal principal) {
         return ResponseEntity.ok().body(organizationService.findProjectByMember(principal.getMember().getId()));
     }
 
     @GetMapping("/{projectID}/info")
     @Operation(summary = "프로젝트 정보 (이름 + 멤버 정보) 조회 API", description = "프로젝트 이름 및 프로젝트 내 회원들 목록을 조회하는 API.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "PROJECT-001", description = "프로젝트를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
-    })
     public ResponseEntity<ProjectInfoDTO> getProject(
             @Parameter(required = true, description = "프로젝트 Id" ,in = ParameterIn.PATH)
             @PathVariable("projectID") Long projectId) {
@@ -90,10 +76,6 @@ public class ProjectController {
     @RoleCheck(role = "OWNER")
     @DeleteMapping("/{projectID}")
     @Operation(summary = "프로젝트 삭제", description = "프로젝트 삭제 API")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "성공", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "404", description = "프로젝트를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
-    })
     public ResponseEntity<String> deleteProject(
             @Parameter(required = true, description = "프로젝트 Id" ,in = ParameterIn.PATH)
             @PathVariable("projectID") Long projectId) {
@@ -111,10 +93,6 @@ public class ProjectController {
     @RoleCheck(role = "OWNER")
     @PatchMapping("/{projectID}")
     @Operation(summary = "프로젝트 정보 (이름 + 멤버 정보) 수정 API", description = " 수정 API")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "PROJECT-001", description = "프로젝트를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
-    })
     public ResponseEntity<String> updateName(
             @Parameter(required = true, description = "프로젝트 Id" ,in = ParameterIn.PATH)
             @PathVariable("projectID") Long projectId,
@@ -128,11 +106,6 @@ public class ProjectController {
     @RoleCheck(role = "OWNER")
     @PostMapping("/{projectID}/join")
     @Operation(summary = "회원 초대", description = "email List를 받아서 멤버 초대. List가 비어 있으면 에러")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "PROJECT-001", description = "프로젝트를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "AUTH-001", description = "사용자를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
-    })
     public ResponseEntity<String> invite(
             @RequestBody InviteMembersRequestDTO inviteMembersRequestDTO,
             @Parameter(required = true, description = "프로젝트 Id" ,in = ParameterIn.PATH)
@@ -145,9 +118,6 @@ public class ProjectController {
     @RoleCheck(role = "MEMBER")
     @DeleteMapping("/{projectID}/out")
     @Operation(summary = "프로젝트 나가기", description = "방장만 내보낼 수 있음.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "성공", content = @Content(mediaType = "application/json")),
-    })
     public ResponseEntity<Void> outOfProject(
             @AuthenticationPrincipal OAuth2UserPrincipal principal,
             @Parameter(required = true, description = "프로젝트 Id" ,in = ParameterIn.PATH)

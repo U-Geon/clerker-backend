@@ -72,10 +72,10 @@ jobs:
         run: sudo docker pull ${{ secrets.DOCKER_USERNAME }}/clerker:latest
 
       - name: docker stop container
-        run: sudo docker stop clerker:latest || true
+        run: sudo docker stop clerker || true
 
       - name: docker run new container
-        run: sudo docker run --name github-actions-demo --rm -d -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/clerker:latest
+        run: sudo docker run --name clerker --rm -d -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/clerker:latest
 
       - name: delete old docker image
         run: sudo docker image prune -f

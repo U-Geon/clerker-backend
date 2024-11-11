@@ -31,11 +31,6 @@ public class MeetingController {
 
     @PostMapping("/create/{projectID}")
     @Operation(summary = "미팅 생성 API", description = "1. 알림 생성 체크 시 프로젝트 내 멤버들에게 알림 생성\n2. startDateTime은 YYYY-MM-DDTHH:mm ex)2024-10-17T09:00")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "성공", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "PROJECT-001", description = "프로젝트를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "AUTH-001", description = "사용자를 찾을 수 없습니다.", content = @Content(mediaType = "application/json")),
-    })
     public ResponseEntity<Void> createMeeting(
             @AuthenticationPrincipal OAuth2UserPrincipal principal,
             @Parameter(required = true, description = "프로젝트 ID", in = ParameterIn.PATH)
@@ -58,10 +53,6 @@ public class MeetingController {
 
     @GetMapping("/detail/{meetingID}")
     @Operation(summary = "회의 상세 조회 API", description = "회의가 종료되기 전 회의 링크와 회의 정보 조회")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "MEETING-001", description = "회의를 찾을 수 없습니다", content = @Content(mediaType = "application/json")),
-    })
     public ResponseEntity<Meeting> detailMeeting(
             @Parameter(required = true, description = "회의 ID", in = ParameterIn.PATH)
             @PathVariable("meetingID") Long meetingId) {

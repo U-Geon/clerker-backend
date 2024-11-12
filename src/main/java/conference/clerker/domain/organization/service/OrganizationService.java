@@ -65,7 +65,7 @@ public class OrganizationService {
         List<Project> projects = organizationRepository.findProjectsWithEndedMeetingsByMemberId(memberId);
         return projects.stream()
                 .map(ProjectWithMeetingsDTO::new)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     // 프로젝트 이름 + 소속 멤버들 정보

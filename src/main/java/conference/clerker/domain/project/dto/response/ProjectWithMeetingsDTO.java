@@ -4,7 +4,6 @@ import conference.clerker.domain.meeting.schema.Meeting;
 import conference.clerker.domain.project.schema.Project;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public record ProjectWithMeetingsDTO(
         Long projectId,
@@ -20,7 +19,7 @@ public record ProjectWithMeetingsDTO(
                 project.getMeetings().stream()
                         .filter(Meeting::getIsEnded)
                         .map(MeetingDTO::new)
-                        .collect(Collectors.toList())
+                        .toList()
         );
     }
 

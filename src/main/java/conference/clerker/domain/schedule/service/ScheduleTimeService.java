@@ -29,6 +29,22 @@ public class ScheduleTimeService {
     @Transactional
     public void create(Long scheduleId, List<String> timeTable, Long memberId) {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(() -> new ScheduleException(ErrorCode.SCHEDULE_NOT_FOUND));
+
+        // 해당 사용자가 등록한 타임 테이블에서 중복된 시간을 등록했는지 체크
+        schedule.getScheduleTimes().stream()
+                .filter(scheduleTime -> scheduleTime.getMemberId().equals(memberId))
+                .findFirst()
+                .ifPresent(scheduleTime -> {
+                    List<String> existingTimes = scheduleTime.getTimeTables().stream()
+                            .map(TimeTable::getTime).toList();
+
+                    for (String time : timeTable) {
+                        if (existingTimes.contains(time)) {
+                            throw new ScheduleException(ErrorCode.DUPLICATE_TIME);
+                        }
+                    }
+                });
+
         ScheduleTime scheduleTime = ScheduleTime.create(schedule, memberId);
         for (String time : timeTable) {
             TimeTable entity = TimeTable.create(scheduleTime, time);

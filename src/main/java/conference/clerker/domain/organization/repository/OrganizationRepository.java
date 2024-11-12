@@ -15,7 +15,7 @@ import java.util.Optional;
 public interface OrganizationRepository extends JpaRepository<Organization, Long> {
     @Query("SELECT DISTINCT o.project FROM Organization o " +
             "LEFT JOIN FETCH o.project.meetings m " +
-            "WHERE o.member.id = :memberId AND o.project.parentProject IS NULL")
+            "WHERE o.member.id = :memberId AND o.project.parentProject IS NULL AND o.project.isDeleted = false")
     List<Project> findProjectsWithEndedMeetingsByMemberId(@Param("memberId") Long memberId);
 
     @Query("SELECT new conference.clerker.domain.organization.dto.MemberInfoDTO(o.id, o.member.username, o.member.email, o.role, o.type) " +

@@ -33,16 +33,12 @@ public class ProjectService {
         return child.getId();
     }
 
-    // 프로젝트 및 소속 Organization까지 삭제
+    // 프로젝트 삭제 (soft delete)
     @Transactional
-    public Boolean deleteById(Long projectId) {
-        try {
-            // 프로젝트 삭제
-            projectRepository.deleteById(projectId);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+    public void deleteById(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ProjectException(ErrorCode.PROJECT_NOT_FOUND));
+        project.setDeleted(true);
     }
 
     // 프로젝트명 업데이트

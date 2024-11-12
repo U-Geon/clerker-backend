@@ -79,14 +79,8 @@ public class ProjectController {
     public ResponseEntity<String> deleteProject(
             @Parameter(required = true, description = "프로젝트 Id" ,in = ParameterIn.PATH)
             @PathVariable("projectID") Long projectId) {
-        scheduleService.deleteAllScheduleByProjectId(projectId);
-        notificationService.deleteAllByProjectId(projectId);
-        Boolean isDeletedProject = projectService.deleteById(projectId);
-        if(isDeletedProject) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.internalServerError().body("{\"msg\" : \"project delete failed\"}");
-        }
+        projectService.deleteById(projectId);
+        return ResponseEntity.noContent().build();
     }
 
     // 프로젝트 이름 및 멤버 정보 수정

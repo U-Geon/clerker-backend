@@ -81,4 +81,10 @@ public class MeetingService {
                 filesByType
         );
     }
+
+    public void setEnded(Long meetingId) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUND));
+        meeting.setIsEnded(true);
+    }
 }

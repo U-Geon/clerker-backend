@@ -30,6 +30,9 @@ public class ModelService {
     @Value("${baseUrl.model}")
     private String baseUrl;
 
+    @Value("${other.aws.s3.bucket}")
+    private String modelServerBucketName;
+
     private final WebClient.Builder webClientBuilder;
     private final S3FileService s3FileService;
     private final MeetingService meetingService;
@@ -54,7 +57,7 @@ public class ModelService {
                     .retrieve()
                     .bodyToMono(ModelResponseDTO.class)
                     .doOnNext(response -> processModelResponse(response, meetingId)) // 받은 ModelResponseDTO를 통한 로직 실행.
-                    .doFinally(signalType -> closeMp3File(mp3File));
+                    .doFinally(signalType -> closeMp3File(mp3File, meetingId));
         } catch (IOException e) {
             log.error("파일 변환 중 IO 에러 발생: {}", e.getMessage());
             return Mono.error(new IllegalStateException("파일 변환 중 IO 에러 발생: " + e.getMessage(), e));
@@ -67,6 +70,7 @@ public class ModelService {
     //테스트용
     @Transactional
     public void testProcessModelResponse(ModelResponseDTO response, Long meetingId) {
+        meetingService.setEnded(meetingId);
         processModelResponse(response, meetingId);
     }
 
@@ -75,8 +79,7 @@ public class ModelService {
         // 여기서 받은 url들을 토대로 파일을 s3에 저장한 뒤 DB에 버킷 경로 저장
         try {
             // zip 파일 압축 해제 후 이미지 업로드
-            //TODO 파일 경로 지정 수정 필요
-            Map<String, String> imageUrlMap = s3FileService.transferZipContentFromOtherS3("clerkertest", response.images(), "images", meetingId);
+            Map<String, String> imageUrlMap = s3FileService.transferZipContentFromOtherS3(modelServerBucketName, response.images(), "images", meetingId);
             // 업로드된 이미지의 파일명과 URL을 MeetingFile에 저장
             for (Map.Entry<String, String> entry : imageUrlMap.entrySet()) {
                 String fileName = entry.getKey();      // 이미지 파일명
@@ -85,15 +88,13 @@ public class ModelService {
             }
 
             //보고서
-            //TODO 파일 경로 지정 수정 필요
-            String reportUrl = s3FileService.processAndUploadMarkdownFile("clerkertest", response.report(),
+            String reportUrl = s3FileService.processAndUploadMarkdownFile(modelServerBucketName, response.report(),
                     "report", meetingId, imageUrlMap);
             String reportName = meetingId + "_" + response.report().substring(response.report().lastIndexOf("/") + 1);
             meetingFileService.create(meetingId, FileType.REPORT, reportUrl, reportName);
 
             //원문
-            //TODO 파일 경로 지정 수정 필요
-            String sttUrl = s3FileService.transferFileFromOtherS3("clerkertest", response.stt(),
+            String sttUrl = s3FileService.transferFileFromOtherS3(modelServerBucketName, response.stt(),
                     "stt", meetingId);
             String sttFileName = meetingId + "_" + response.stt().substring(response.stt().lastIndexOf("/") + 1);
             meetingFileService.create(meetingId, FileType.STT_RAW, sttUrl, sttFileName);
@@ -103,8 +104,6 @@ public class ModelService {
         }
 
     }
-
-
 
 
     // webm to mp3 이후 s3에 저장하는 로직 테스트
@@ -221,7 +220,10 @@ public class ModelService {
     }
 
     // s3 업로드 후 로컬 환경에 설치되는 mp3 파일 삭제
-    private void closeMp3File(MultipartFile mp3File) {
+    private void closeMp3File(MultipartFile mp3File, Long meetingId) {
+
+        meetingService.setEnded(meetingId);
+
         try {
             if (mp3File != null) {
                 mp3File.getInputStream();

@@ -1,9 +1,9 @@
 package conference.clerker.global.aop.roleCheck;
 
-import conference.clerker.domain.member.schema.Member;
 import conference.clerker.domain.organization.service.OrganizationService;
 import conference.clerker.global.exception.ErrorCode;
 import conference.clerker.global.exception.domain.OrganizationException;
+import conference.clerker.global.oauth2.service.OAuth2UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
@@ -45,10 +45,10 @@ public class RoleCheckAspect {
         }
 
         // 인증된 사용자 (Member) 가져오기
-        Member member = (Member) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        OAuth2UserPrincipal oAuth2UserPrincipal = (OAuth2UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         // Organization에서 Role 정보 조회
-        String role = organizationService.findRoleByMemberAndProject(member.getId(), projectId).toString();
+        String role = organizationService.findRoleByMemberAndProject(oAuth2UserPrincipal.getMember().getId(), projectId).toString();
 
         // Role 체크
         if (!role.equals(requiredRole)) {

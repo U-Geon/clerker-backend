@@ -56,7 +56,7 @@ public class Schedule {
     @JoinColumn(name = "project_id")
     private Project project;
 
-    @OneToMany(mappedBy = "schedule")
+    @OneToMany(mappedBy = "schedule", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ScheduleTime> scheduleTimes = new ArrayList<>();
 
     public static Schedule create(Project project, Member member, CreateScheduleRequestDTO requestDTO) {

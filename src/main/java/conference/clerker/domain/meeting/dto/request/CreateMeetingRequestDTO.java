@@ -10,6 +10,7 @@ public record CreateMeetingRequestDTO (
         @NotBlank
         LocalDateTime startDateTime,
 
+        @NotBlank
         String domain,
 
         @NotBlank

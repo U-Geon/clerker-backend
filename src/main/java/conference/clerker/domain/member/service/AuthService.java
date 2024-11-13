@@ -57,8 +57,5 @@ public class AuthService {
                 profileRepository.save(profile);
             }
         }
-
     }
-
-
 }

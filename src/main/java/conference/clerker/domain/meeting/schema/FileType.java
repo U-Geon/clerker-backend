@@ -1,7 +1,7 @@
 package conference.clerker.domain.meeting.schema;
 
 public enum FileType {
-    IMAGE,
     REPORT,
+    IMAGE,
     STT_RAW
 }

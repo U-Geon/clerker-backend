@@ -31,6 +31,34 @@ public class AuthService {
     public void update(Long memberId, @Valid MultipartFile profileImage, @Valid String username) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new AuthException(MEMBER_NOT_FOUND));
 
+        //구현 시작 기존 프로필 가져오기
+        Profile existingprofile = (Profile) profileRepository.findByMember(member)
+                .orElse(null);
+
+
+        //username 만 업데이트 ( jpa 더티체킹으로?)
+        member.setUsername(username);
+
+        // 프로필 이미지가 업로드된 경우
+        if (profileImage != null && !profileImage.isEmpty()) {
+            // s3에서 삭제
+            if (existingprofile != null) {
+                s3FileService.deleteFile(profileImage.getOriginalFilename());
+            }
+            String filename = profileImage.getOriginalFilename();
+            String profileURL = s3FileService.uploadFile("profile", filename, profileImage);
+
+            // 기존 프로필 수정 or 새롭게 생성
+            if (existingprofile != null) {
+                existingprofile.setUrl(profileURL);
+                existingprofile.setFilename(filename);
+            } else {
+                Profile newProfile = Profile.create(member, profileURL, filename);
+                profileRepository.save(newProfile);
+            }
+        }
+
+
         // JPA dirty checking
         member.setUsername(username);
 

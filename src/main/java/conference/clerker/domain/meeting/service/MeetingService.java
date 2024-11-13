@@ -7,6 +7,7 @@ import conference.clerker.domain.meeting.repository.MeetingRepository;
 import conference.clerker.domain.meeting.schema.Meeting;
 import conference.clerker.domain.project.repository.ProjectRepository;
 import conference.clerker.domain.project.schema.Project;
+import conference.clerker.global.exception.CustomException;
 import conference.clerker.global.exception.ErrorCode;
 import conference.clerker.global.exception.domain.AuthException;
 import conference.clerker.global.exception.domain.MeetingException;
@@ -28,15 +29,19 @@ public class MeetingService {
     // 미팅 생성
     @Transactional
     public void create(Long projectId, CreateMeetingRequestDTO requestDTO) {
-        Project project = projectRepository.findById(projectId).orElseThrow(()
-                -> new AuthException(ErrorCode.PROJECT_NOT_FOUND));
+        try {
+            Project project = projectRepository.findById(projectId).orElseThrow(()
+                    -> new AuthException(ErrorCode.PROJECT_NOT_FOUND));
 
-        String googleMeetUrl = googleMeetService.createMeeting(requestDTO.name(), requestDTO.startDateTime());
+            String googleMeetUrl = googleMeetService.createMeeting(requestDTO.name(), requestDTO.startDateTime());
 
-        Meeting meeting = Meeting.create(project, requestDTO.name(), googleMeetUrl, requestDTO);
-        meeting.setProject(project);
-        project.getMeetings().add(meeting);
-        meetingRepository.save(meeting);
+            Meeting meeting = Meeting.create(project, requestDTO.name(), googleMeetUrl, requestDTO);
+            meeting.setProject(project);
+            project.getMeetings().add(meeting);
+            meetingRepository.save(meeting);
+        } catch (NullPointerException e) {
+            throw new CustomException(ErrorCode.BODY_VALUE_NOT_FOUND);
+        }
     }
 
     // project ID를 통한 미팅 목록 조회

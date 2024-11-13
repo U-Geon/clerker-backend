@@ -1,7 +1,6 @@
 package conference.clerker.domain.member.controller;
 
 
-import conference.clerker.domain.member.DTO.request.TokenDTO;
 import conference.clerker.domain.member.service.AuthService;
 import conference.clerker.global.oauth2.service.OAuth2UserPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,7 +15,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor

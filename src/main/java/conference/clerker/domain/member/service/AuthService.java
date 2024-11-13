@@ -28,13 +28,11 @@ public class AuthService {
     private final JwtProvider jwtProvider;
 
     @Transactional
-    public void update(Long memberId, @Valid MultipartFile profileImage, @Valid String username) {
+    public void update(Long memberId, MultipartFile profileImage, String username) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new AuthException(MEMBER_NOT_FOUND));
 
         //구현 시작 기존 프로필 가져오기
-        Profile existingprofile = (Profile) profileRepository.findByMember(member)
-                .orElse(null);
-
+        Profile existingProfile = profileRepository.findByMember(member).orElse(null);
 
         //username 만 업데이트 ( jpa 더티체킹으로?)
         member.setUsername(username);
@@ -42,31 +40,22 @@ public class AuthService {
         // 프로필 이미지가 업로드된 경우
         if (profileImage != null && !profileImage.isEmpty()) {
             // s3에서 삭제
-            if (existingprofile != null) {
+            if (existingProfile != null) {
                 s3FileService.deleteFile(profileImage.getOriginalFilename());
             }
             String filename = profileImage.getOriginalFilename();
             String profileURL = s3FileService.uploadFile("profile", filename, profileImage);
 
             // 기존 프로필 수정 or 새롭게 생성
-            if (existingprofile != null) {
-                existingprofile.setUrl(profileURL);
-                existingprofile.setFilename(filename);
+            if (existingProfile != null) {
+                existingProfile.setUrl(profileURL);
+                existingProfile.setFilename(filename);
             } else {
-                Profile newProfile = Profile.create(member, profileURL, filename);
-                profileRepository.save(newProfile);
+                Profile profile = Profile.create(member, profileURL, filename);
+                profileRepository.save(profile);
             }
         }
 
-
-        // JPA dirty checking
-        member.setUsername(username);
-
-        String filename = profileImage.getOriginalFilename();
-        String profileURL = s3FileService.uploadFile("profile", filename, profileImage);
-
-        Profile profile = Profile.create(member, profileURL, filename);
-        profileRepository.save(profile);
     }
 
 

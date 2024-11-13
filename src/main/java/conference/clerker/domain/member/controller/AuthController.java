@@ -30,10 +30,12 @@ public class AuthController {
             @Parameter(description = "프로필 사진", required = true, content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE))
             @RequestPart("profileImage") MultipartFile profileImage,
             @Parameter(description = "변경하려는 username", required = true)
-            @RequestPart("username") String username) {
-        authService.update(principal.getMember().getId(), profileImage, username);
-
-        return ResponseEntity.noContent().build();
+            @Valid @RequestPart("username") String username) {
+        String accessToken = authService.update(principal.getMember().getId(), profileImage, username);
+        if(accessToken == null) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.noContent().header("Authorization", "Bearer " + accessToken).build();
     }
 
 }

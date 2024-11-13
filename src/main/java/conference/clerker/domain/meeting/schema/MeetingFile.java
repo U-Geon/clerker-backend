@@ -20,9 +20,6 @@ public class MeetingFile {
     @Column(name = "file_type", nullable = false)
     private FileType fileType;
 
-    @Column(name = "url", columnDefinition = "TEXT")
-    private String url;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "meeting_id")
     private Meeting meeting;

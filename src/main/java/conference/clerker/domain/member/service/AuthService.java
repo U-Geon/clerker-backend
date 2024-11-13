@@ -6,16 +6,14 @@ import conference.clerker.domain.member.repository.ProfileRepository;
 import conference.clerker.domain.member.schema.Member;
 import conference.clerker.domain.member.schema.Profile;
 import conference.clerker.global.aws.s3.S3FileService;
+import conference.clerker.global.exception.ErrorCode;
 import conference.clerker.global.exception.domain.AuthException;
-import conference.clerker.global.jwt.JwtProvider;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import static conference.clerker.global.exception.ErrorCode.MEMBER_NOT_FOUND;
+import java.io.IOException;
 
 @Service
 @Transactional(readOnly = true)
@@ -25,11 +23,10 @@ public class AuthService {
     private final ProfileRepository profileRepository;
     private final MemberRepository memberRepository;
     private final S3FileService s3FileService;
-    private final JwtProvider jwtProvider;
 
     @Transactional
     public void update(Long memberId, MultipartFile profileImage, String username) {
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> new AuthException(MEMBER_NOT_FOUND));
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new AuthException(ErrorCode.MEMBER_NOT_FOUND));
 
         //구현 시작 기존 프로필 가져오기
         Profile existingProfile = profileRepository.findByMember(member).orElse(null);
@@ -44,7 +41,12 @@ public class AuthService {
                 s3FileService.deleteFile(profileImage.getOriginalFilename());
             }
             String filename = profileImage.getOriginalFilename();
-            String profileURL = s3FileService.uploadFile("profile", filename, profileImage);
+            String profileURL = null;
+            try {
+                profileURL = s3FileService.uploadFile("profile", filename, profileImage);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
 
             // 기존 프로필 수정 or 새롭게 생성
             if (existingProfile != null) {

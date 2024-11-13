@@ -9,6 +9,9 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum ErrorCode {
 
+    BODY_VALUE_NOT_FOUND(HttpStatus.BAD_REQUEST, "ERROR-001", "Request Body에 누락된 정보가 있습니다."),
+    BODY_NOT_EMPTY(HttpStatus.BAD_REQUEST, "ERROR-002", "Container Type이 비어있습니다."),
+
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "AUTH-001", "사용자를 찾을 수 없습니다."),
 
     PROJECT_NOT_FOUND(HttpStatus.NOT_FOUND, "PROJECT-001", "프로젝트를 찾을 수 없습니다."),

@@ -2,7 +2,6 @@ package conference.clerker.domain.schedule.controller;
 
 
 import conference.clerker.domain.meeting.dto.response.FindMeetingsDTO;
-import conference.clerker.domain.meeting.service.MeetingFileService;
 import conference.clerker.domain.meeting.service.MeetingService;
 import conference.clerker.domain.notification.service.NotificationService;
 import conference.clerker.domain.organization.service.OrganizationService;
@@ -17,9 +16,6 @@ import conference.clerker.global.oauth2.service.OAuth2UserPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

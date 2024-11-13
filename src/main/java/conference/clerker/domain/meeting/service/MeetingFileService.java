@@ -20,11 +20,11 @@ public class MeetingFileService {
     private final MeetingFileRepository meetingFileRepository;
 
     @Transactional
-    public MeetingFile create(Long meetingId, FileType fileType, String url){
+    public MeetingFile create(Long meetingId, FileType fileType, String url, String name){
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new AuthException(ErrorCode.MEETING_NOT_FOUND));
 
-        MeetingFile meetingFIle = MeetingFile.create(meeting, fileType, url);
+        MeetingFile meetingFIle = MeetingFile.create(meeting, fileType, url, name);
 
         return meetingFileRepository.save(meetingFIle);
     }

@@ -6,15 +6,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
@@ -44,6 +40,25 @@ public class ModelController {
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));
     }
+
+    @PostMapping("/testProcessResponse")
+    @Operation(
+            summary = "processModelResponse 메서드 테스트",
+            description = "테스트 데이터를 사용하여 processModelResponse 메서드를 실행합니다."
+    )
+    public ResponseEntity<String> testProcessResponse(
+            @RequestParam(name = "meetingId") Long meetingId, // 파라미터 이름 명시
+            @RequestBody ModelResponseDTO response
+    ) {
+        try {
+            modelService.testProcessModelResponse(response, meetingId);
+            return ResponseEntity.ok("processModelResponse 메서드가 성공적으로 실행되었습니다.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("processModelResponse 실행 중 오류 발생: " + e.getMessage());
+        }
+    }
+
 
 //    @PostMapping("/test1")
 //    @Operation(summary = "webm to mp3 이후 s3 url 발급 테스트")

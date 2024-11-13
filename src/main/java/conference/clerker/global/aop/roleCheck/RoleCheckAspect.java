@@ -1,6 +1,5 @@
 package conference.clerker.global.aop.roleCheck;
 
-import conference.clerker.domain.member.schema.Member;
 import conference.clerker.domain.organization.service.OrganizationService;
 import conference.clerker.global.exception.ErrorCode;
 import conference.clerker.global.exception.domain.OrganizationException;

@@ -12,16 +12,17 @@ import conference.clerker.domain.project.dto.request.UpdateProjectRequestDTO;
 import conference.clerker.domain.project.dto.response.ProjectWithMeetingsDTO;
 import conference.clerker.domain.project.schema.Project;
 import conference.clerker.domain.project.repository.ProjectRepository;
+import conference.clerker.global.exception.CustomException;
 import conference.clerker.global.exception.ErrorCode;
 import conference.clerker.global.exception.domain.AuthException;
 import conference.clerker.global.exception.domain.OrganizationException;
 import conference.clerker.global.exception.domain.ProjectException;
+import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -44,19 +45,23 @@ public class OrganizationService {
     // 멤버 초대
     @Transactional
     public void inviteMember(List<String> emails, Long projectId) {
-        Project project = projectRepository.findById(projectId).orElseThrow(() -> new ProjectException(ErrorCode.PROJECT_NOT_FOUND));
+        try {
+            Project project = projectRepository.findById(projectId).orElseThrow(() -> new ProjectException(ErrorCode.PROJECT_NOT_FOUND));
 
-        for (String email : emails) {
-            Member member = memberRepository.findByEmail(email).orElseThrow(() -> new AuthException(ErrorCode.MEMBER_NOT_FOUND));
-            boolean isMemberAlreadyInProject = organizationRepository
-                    .findByMemberIdAndProjectId(member.getId(), projectId)
-                    .isPresent();
+            for (String email : emails) {
+                Member member = memberRepository.findByEmail(email).orElseThrow(() -> new AuthException(ErrorCode.MEMBER_NOT_FOUND));
+                boolean isMemberAlreadyInProject = organizationRepository
+                        .findByMemberIdAndProjectId(member.getId(), projectId)
+                        .isPresent();
 
-            if (isMemberAlreadyInProject) {
-                throw new OrganizationException(ErrorCode.DUPLICATED_ORGANIZATION);
+                if (isMemberAlreadyInProject) {
+                    throw new OrganizationException(ErrorCode.DUPLICATED_ORGANIZATION);
+                }
+                Organization organizationMember = Organization.createMember(member, project);
+                organizationRepository.save(organizationMember);
             }
-            Organization organizationMember = Organization.createMember(member, project);
-            organizationRepository.save(organizationMember);
+        } catch (ConstraintViolationException e) {
+            throw new CustomException(ErrorCode.BODY_NOT_EMPTY);
         }
     }
 
@@ -80,24 +85,18 @@ public class OrganizationService {
         return organizationRepository.findMembersByProjectId(projectId);
     }
 
-    // 프로젝트 내 멤버들 삭제
-    @Transactional
-    public void deleteMembers(Long projectId) {
-        try {
-            organizationRepository.deleteAllByProjectId(projectId);
-        } catch (Exception e) {
-            throw new OrganizationException(ErrorCode.ORGANIZATION_NOT_FOUND);
-        }
-    }
-
     // 멤버들 정보 수정
     @Transactional
     public void updateMembers(UpdateProjectRequestDTO requestDTO) {
-        requestDTO.members().forEach(member -> {
-            Organization organization = organizationRepository.findById(member.organizationId()).orElseThrow(() -> new OrganizationException(ErrorCode.ORGANIZATION_NOT_FOUND));
-            organization.setRole(member.role());
-            organization.setType(member.type());
-        });
+        try {
+            requestDTO.members().forEach(member -> {
+                Organization organization = organizationRepository.findById(member.organizationId()).orElseThrow(() -> new OrganizationException(ErrorCode.ORGANIZATION_NOT_FOUND));
+                organization.setRole(member.role());
+                organization.setType(member.type());
+            });
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.BODY_VALUE_NOT_FOUND);
+        }
     }
 
     // 프로젝트 나가기

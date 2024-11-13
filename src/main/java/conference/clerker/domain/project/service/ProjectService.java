@@ -3,6 +3,7 @@ package conference.clerker.domain.project.service;
 import conference.clerker.domain.project.dto.request.UpdateProjectRequestDTO;
 import conference.clerker.domain.project.schema.Project;
 import conference.clerker.domain.project.repository.ProjectRepository;
+import conference.clerker.global.exception.CustomException;
 import conference.clerker.global.exception.ErrorCode;
 import conference.clerker.global.exception.domain.ProjectException;
 import lombok.RequiredArgsConstructor;
@@ -44,7 +45,11 @@ public class ProjectService {
     // 프로젝트명 업데이트
     @Transactional
     public void update(Long projectId, UpdateProjectRequestDTO requestDTO) {
-        Project project = projectRepository.findById(projectId).orElseThrow(() -> new ProjectException(ErrorCode.PROJECT_NOT_FOUND));
-        project.setName(requestDTO.projectName());
+        try {
+            Project project = projectRepository.findById(projectId).orElseThrow(() -> new ProjectException(ErrorCode.PROJECT_NOT_FOUND));
+            project.setName(requestDTO.projectName());
+        } catch (ProjectException e) {
+            throw new CustomException(ErrorCode.BODY_VALUE_NOT_FOUND);
+        }
     }
 }

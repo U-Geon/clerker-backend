@@ -8,8 +8,10 @@ import conference.clerker.domain.schedule.repository.ScheduleRepository;
 import conference.clerker.domain.schedule.repository.ScheduleTimeRepository;
 import conference.clerker.domain.schedule.repository.TimeTableRepository;
 import conference.clerker.domain.schedule.schema.TimeTable;
+import conference.clerker.global.exception.CustomException;
 import conference.clerker.global.exception.ErrorCode;
 import conference.clerker.global.exception.domain.ScheduleException;
+import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,9 +30,24 @@ public class ScheduleTimeService {
     // 개인별 스케쥴 기록 생성.
     @Transactional
     public void create(Long scheduleId, List<String> timeTable, Long memberId) {
-        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(() -> new ScheduleException(ErrorCode.SCHEDULE_NOT_FOUND));
+        try {
+            Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(() -> new ScheduleException(ErrorCode.SCHEDULE_NOT_FOUND));
 
-        // 해당 사용자가 등록한 타임 테이블에서 중복된 시간을 등록했는지 체크
+            // 해당 사용자가 등록한 타임 테이블에서 중복된 시간을 등록했는지 체크
+            validateDuplicatedTimeTable(timeTable, memberId, schedule);
+
+            ScheduleTime scheduleTime = ScheduleTime.create(schedule, memberId);
+            for (String time : timeTable) {
+                TimeTable entity = TimeTable.create(scheduleTime, time);
+                timeTableRepository.save(entity);
+            }
+            scheduleTimeRepository.save(scheduleTime);
+        } catch (ConstraintViolationException e) {
+            throw new CustomException(ErrorCode.BODY_NOT_EMPTY);
+        }
+    }
+
+    private void validateDuplicatedTimeTable(List<String> timeTable, Long memberId, Schedule schedule) {
         schedule.getScheduleTimes().stream()
                 .filter(scheduleTime -> scheduleTime.getMemberId().equals(memberId))
                 .findFirst()
@@ -44,13 +61,6 @@ public class ScheduleTimeService {
                         }
                     }
                 });
-
-        ScheduleTime scheduleTime = ScheduleTime.create(schedule, memberId);
-        for (String time : timeTable) {
-            TimeTable entity = TimeTable.create(scheduleTime, time);
-            timeTableRepository.save(entity);
-        }
-        scheduleTimeRepository.save(scheduleTime);
     }
 
     // 해당 스케쥴 상세 조회

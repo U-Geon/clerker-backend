@@ -7,9 +7,7 @@ import conference.clerker.domain.member.schema.Member;
 import conference.clerker.domain.member.schema.Profile;
 import conference.clerker.global.aws.s3.S3FileService;
 import conference.clerker.global.exception.domain.AuthException;
-import conference.clerker.global.jwt.JwtProvider;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,14 +25,12 @@ public class AuthService {
     private final ProfileRepository profileRepository;
     private final MemberRepository memberRepository;
     private final S3FileService s3FileService;
-    private final JwtProvider jwtProvider;
 
     @Transactional
     public void update(Long memberId, @Valid MultipartFile profileImage, @Valid String username) {
         try {
             Member member = memberRepository.findById(memberId).orElseThrow(() -> new AuthException(MEMBER_NOT_FOUND));
 
-            // JPA dirty checking
             member.setUsername(username);
 
             String filename = profileImage.getOriginalFilename();
@@ -46,6 +42,4 @@ public class AuthService {
             throw new RuntimeException(e);
         }
     }
-
-
 }

@@ -76,6 +76,9 @@ public class ModelService {
 
     // 받은 ModelResponseDTO를 통한 로직 실행.
     private void processModelResponse(ModelResponseDTO response, Long meetingId) {
+        // meeting 엔티티 컬럼 변경 (회의 종료)
+        meetingService.setEnded(meetingId);
+
         // 여기서 받은 url들을 토대로 파일을 s3에 저장한 뒤 DB에 버킷 경로 저장
         try {
             // zip 파일 압축 해제 후 이미지 업로드
@@ -221,9 +224,6 @@ public class ModelService {
 
     // s3 업로드 후 로컬 환경에 설치되는 mp3 파일 삭제
     private void closeMp3File(MultipartFile mp3File, Long meetingId) {
-
-        meetingService.setEnded(meetingId);
-
         try {
             if (mp3File != null) {
                 mp3File.getInputStream();

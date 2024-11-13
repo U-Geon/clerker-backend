@@ -8,7 +8,8 @@ import conference.clerker.domain.model.dto.request.ModelRequestDTO;
 import conference.clerker.domain.model.dto.response.ModelResponseDTO;
 import conference.clerker.global.aws.s3.S3FileService;
 import java.io.*;
-import java.util.List;
+import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -63,30 +64,47 @@ public class ModelService {
         }
     }
 
+    //테스트용
+    @Transactional
+    public void testProcessModelResponse(ModelResponseDTO response, Long meetingId) {
+        processModelResponse(response, meetingId);
+    }
+
     // 받은 ModelResponseDTO를 통한 로직 실행.
     private void processModelResponse(ModelResponseDTO response, Long meetingId) {
         // 여기서 받은 url들을 토대로 파일을 s3에 저장한 뒤 DB에 버킷 경로 저장
         try {
             // zip 파일 압축 해제 후 이미지 업로드
             //TODO 파일 경로 지정 수정 필요
-            List<String> imageUrls = s3FileService.transferZipContentFromOtherS3("bucketName", response.images(), "images");
-            for (String imageUrl : imageUrls) meetingFileService.create(meetingId, FileType.IMAGE, imageUrl);
+            Map<String, String> imageUrlMap = s3FileService.transferZipContentFromOtherS3("clerkertest", response.images(), "images", meetingId);
+            // 업로드된 이미지의 파일명과 URL을 MeetingFile에 저장
+            for (Map.Entry<String, String> entry : imageUrlMap.entrySet()) {
+                String fileName = entry.getKey();      // 이미지 파일명
+                String imageUrl = entry.getValue();    // 업로드된 이미지 URL
+                meetingFileService.create(meetingId, FileType.IMAGE, imageUrl, fileName);
+            }
 
             //보고서
             //TODO 파일 경로 지정 수정 필요
-            String reportUrl = s3FileService.transferFileFromOtherS3("bucketName", response.report(), "report");
-            meetingFileService.create(meetingId, FileType.REPORT, reportUrl);
+            String reportUrl = s3FileService.processAndUploadMarkdownFile("clerkertest", response.report(),
+                    "report", meetingId, imageUrlMap);
+            String reportName = meetingId + "_" + response.report().substring(response.report().lastIndexOf("/") + 1);
+            meetingFileService.create(meetingId, FileType.REPORT, reportUrl, reportName);
 
             //원문
             //TODO 파일 경로 지정 수정 필요
-            String sttUrl = s3FileService.transferFileFromOtherS3("bucketName", response.stt(), "stt");
-            meetingFileService.create(meetingId, FileType.STT_RAW, sttUrl);
+            String sttUrl = s3FileService.transferFileFromOtherS3("clerkertest", response.stt(),
+                    "stt", meetingId);
+            String sttFileName = meetingId + "_" + response.stt().substring(response.stt().lastIndexOf("/") + 1);
+            meetingFileService.create(meetingId, FileType.STT_RAW, sttUrl, sttFileName);
 
         } catch (Exception e){
             log.error("파일 다운 중 에러 발생: {}", e.getMessage());
         }
 
     }
+
+
 
 
     // webm to mp3 이후 s3에 저장하는 로직 테스트

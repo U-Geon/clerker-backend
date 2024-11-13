@@ -1,6 +1,7 @@
 package conference.clerker.domain.meeting.controller;
 
 import conference.clerker.domain.meeting.dto.request.CreateMeetingRequestDTO;
+import conference.clerker.domain.meeting.dto.response.MeetingResultDTO;
 import conference.clerker.domain.meeting.schema.Meeting;
 import conference.clerker.domain.meeting.service.MeetingService;
 import conference.clerker.domain.notification.service.NotificationService;
@@ -52,6 +53,15 @@ public class MeetingController {
             @PathVariable("meetingID") Long meetingId) {
 
        return ResponseEntity.ok().body(meetingService.findById(meetingId));
+    }
+
+    @GetMapping("/result/{meetingID}")
+    @Operation(summary = "회의 결과 조회 API", description = "회의가 종료된 후 생성된 결과물 조회")
+    public ResponseEntity<MeetingResultDTO> meetingReport(
+            @Parameter(required = true, description = "회의 ID", in = ParameterIn.PATH)
+            @PathVariable("meetingID") Long meetingId) {
+
+        return ResponseEntity.ok().body(meetingService.findByIdAndMeetingFileId(meetingId));
     }
 
 }

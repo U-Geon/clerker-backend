@@ -17,6 +17,9 @@ public enum ErrorCode {
     PROJECT_NOT_FOUND(HttpStatus.NOT_FOUND, "PROJECT-001", "프로젝트를 찾을 수 없습니다."),
 
     SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, "SCHEDULE-001", "스케쥴을 찾을 수 없습니다."),
+
+    SCHEDULE_TIME_NOT_FOUND(HttpStatus.NOT_FOUND, "SCHEDULE_TIME-001", "스케쥴 시간표를 찾을 수 없습니다."),
+
     DUPLICATE_TIME(HttpStatus.CONFLICT, "SCHEDULE-002", "중복된 시간은 스케쥴에 등록할 수 없습니다."),
 
     MEETING_NOT_FOUND(HttpStatus.NOT_FOUND, "MEETING-001", "회의를 찾을 수 없습니다"),

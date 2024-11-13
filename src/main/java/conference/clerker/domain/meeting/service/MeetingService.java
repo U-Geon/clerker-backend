@@ -58,21 +58,21 @@ public class MeetingService {
     }
 
     public Meeting findById(Long id) {
-        return meetingRepository.findById(id).orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUND));
+        return meetingRepository.findById(id)
+                .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUND));
     }
 
-    public MeetingResultDTO findByIdAndMeetingFileId(Long meetingId) {
+    // 미팅 파일 목록 조회
+    public MeetingResultDTO findMeetingFiles(Long meetingId) {
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new RuntimeException("Meeting not found id: " + meetingId));
 
         Map<FileType, List<MeetingFIleDTO>> filesByType = meetingFileRepository.findByMeetingId(meetingId).stream()
-                .filter(file -> file.getFileType() != FileType.IMAGE) // IMAGE 타입을 제외
+                .filter(file -> file.getFileType() != FileType.IMAGE)
                 .collect(Collectors.groupingBy(
                         MeetingFile::getFileType,
                         Collectors.mapping(MeetingFIleDTO::new, Collectors.toList())
                 ));
-
-
 
         return new MeetingResultDTO(
                 meeting.getId(),
@@ -82,6 +82,7 @@ public class MeetingService {
         );
     }
 
+    @Transactional
     public void setEnded(Long meetingId) {
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUND));

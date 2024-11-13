@@ -9,8 +9,13 @@ import conference.clerker.domain.organization.service.OrganizationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.URI;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +24,9 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/api/meeting")
 public class MeetingController {
+
+    @Value("${baseUrl.front}")
+    private String frontUrl;
 
     private final MeetingService meetingService;
     private final OrganizationService organizationService;
@@ -47,12 +55,20 @@ public class MeetingController {
     }
 
     @GetMapping("/detail/{meetingID}")
-    @Operation(summary = "회의 상세 조회 API", description = "회의가 종료되기 전 회의 링크와 회의 정보 조회")
-    public ResponseEntity<Meeting> detailMeeting(
+    @Operation(summary = "회의 상세 조회 API", description = "회의 종료 전 : 회의 링크와 회의 정보 조회\n\n회의 종료 후 : 상세 페이지로 리디렉션")
+    public ResponseEntity<?> detailMeeting(
             @Parameter(required = true, description = "회의 ID", in = ParameterIn.PATH)
             @PathVariable("meetingID") Long meetingId) {
 
-       return ResponseEntity.ok().body(meetingService.findById(meetingId));
+        Meeting meeting = meetingService.findById(meetingId);
+
+        if (meeting.getIsEnded()) {
+            String redirectionUrl = frontUrl + "/project/summary/" + meetingId;
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .location(URI.create(redirectionUrl))
+                    .build();
+        }
+        return ResponseEntity.ok(meeting);
     }
 
     @GetMapping("/result/{meetingID}")
@@ -61,7 +77,7 @@ public class MeetingController {
             @Parameter(required = true, description = "회의 ID", in = ParameterIn.PATH)
             @PathVariable("meetingID") Long meetingId) {
 
-        return ResponseEntity.ok().body(meetingService.findByIdAndMeetingFileId(meetingId));
+        return ResponseEntity.ok().body(meetingService.findMeetingFiles(meetingId));
     }
 
 }

@@ -1,13 +1,11 @@
 package conference.clerker.domain.project.controller;
 
-import conference.clerker.domain.notification.service.NotificationService;
 import conference.clerker.domain.organization.dto.ProjectInfoDTO;
 import conference.clerker.domain.organization.service.OrganizationService;
 import conference.clerker.domain.project.dto.request.InviteMembersRequestDTO;
 import conference.clerker.domain.project.dto.request.UpdateProjectRequestDTO;
 import conference.clerker.domain.project.dto.response.ProjectWithMeetingsDTO;
 import conference.clerker.domain.project.service.ProjectService;
-import conference.clerker.domain.schedule.service.ScheduleService;
 import conference.clerker.global.aop.roleCheck.RoleCheck;
 import conference.clerker.global.oauth2.service.OAuth2UserPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,8 +28,6 @@ public class ProjectController {
 
     private final ProjectService projectService;
     private final OrganizationService organizationService;
-    private final ScheduleService scheduleService;
-    private final NotificationService notificationService;
 
     @PostMapping("/create")
     @Operation(summary = "프로젝트 생성", description = "프로젝트 생성 탭 클릭 시 요청. 토큰 필요")

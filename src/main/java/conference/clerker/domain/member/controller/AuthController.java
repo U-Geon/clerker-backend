@@ -28,9 +28,9 @@ public class AuthController {
     public ResponseEntity<Void> update(
             @AuthenticationPrincipal OAuth2UserPrincipal principal,
             @Parameter(description = "프로필 사진", required = true, content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE))
-            @Valid @RequestPart("profileImage") MultipartFile profileImage,
+            @RequestPart("profileImage") MultipartFile profileImage,
             @Parameter(description = "변경하려는 username", required = true)
-            @Valid @RequestPart("username") @NotBlank String username) {
+            @RequestPart("username") String username) {
         authService.update(principal.getMember().getId(), profileImage, username);
 
         return ResponseEntity.noContent().build();

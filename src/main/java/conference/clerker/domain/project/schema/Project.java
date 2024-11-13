@@ -30,6 +30,10 @@ public class Project {
     @JsonIgnore
     private Project parentProject;
 
+    @Column(nullable = false)
+    @JsonIgnore
+    private boolean isDeleted;
+
     @OneToMany(mappedBy = "parentProject", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Project> childProjects = new ArrayList<>();
 
@@ -42,13 +46,15 @@ public class Project {
 
     public static Project create() {
         return Project.builder()
-                .name("새로운 프로젝트").build();
+                .name("새로운 프로젝트")
+                .isDeleted(false).build();
     }
 
     public static Project create(Project parentProject) {
         Project project = new Project();
         project.setName(parentProject.getName());
         project.setParentProject(parentProject);
+        project.setDeleted(false);
         return project;
     }
 
@@ -56,12 +62,6 @@ public class Project {
         this.parentProject = project;
         if (!project.getChildProjects().contains(this)) {
             project.getChildProjects().add(this);
-        }
-    }
-
-    public void removeParentProject() {
-        if (this.parentProject != null) {
-            this.parentProject.getChildProjects().remove(this);
         }
     }
 }

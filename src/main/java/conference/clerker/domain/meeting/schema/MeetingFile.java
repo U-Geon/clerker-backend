@@ -16,17 +16,20 @@ public class MeetingFile {
 
     @Column(name = "url", columnDefinition = "TEXT")
     private String url;
-
-    @Column(name = "filename")
-    private String filename;
+  
+    @Column(name = "file_type", nullable = false)
+    private FileType fileType;
+    
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "meeting_id")
     private Meeting meeting;
 
-    public static MeetingFile create(Meeting meeting) {
+    public static MeetingFile create(Meeting meeting, FileType fileType, String url) {
         return MeetingFile.builder()
                 .meeting(meeting)
+                .fileType(fileType)
+                .url(url)
                 .build();
     }
 }

@@ -6,8 +6,12 @@ import java.time.LocalDateTime;
 public record CreateMeetingRequestDTO (
         @NotBlank
         String name,
+
         @NotBlank
         LocalDateTime startDateTime,
+
+        String domain,
+
         @NotBlank
         Boolean isNotify
 ) {

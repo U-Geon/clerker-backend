@@ -1,11 +1,8 @@
 package conference.clerker.domain.project.service;
 
-import conference.clerker.domain.notification.service.NotificationService;
-import conference.clerker.domain.organization.service.OrganizationService;
 import conference.clerker.domain.project.dto.request.UpdateProjectRequestDTO;
 import conference.clerker.domain.project.schema.Project;
 import conference.clerker.domain.project.repository.ProjectRepository;
-import conference.clerker.domain.schedule.service.ScheduleService;
 import conference.clerker.global.exception.ErrorCode;
 import conference.clerker.global.exception.domain.ProjectException;
 import lombok.RequiredArgsConstructor;
@@ -36,16 +33,12 @@ public class ProjectService {
         return child.getId();
     }
 
-    // 프로젝트 및 소속 Organization까지 삭제
+    // 프로젝트 삭제 (soft delete)
     @Transactional
-    public Boolean deleteById(Long projectId) {
-        try {
-            // 프로젝트 삭제
-            projectRepository.deleteById(projectId);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+    public void deleteById(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ProjectException(ErrorCode.PROJECT_NOT_FOUND));
+        project.setDeleted(true);
     }
 
     // 프로젝트명 업데이트

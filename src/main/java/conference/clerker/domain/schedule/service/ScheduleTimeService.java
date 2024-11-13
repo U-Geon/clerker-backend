@@ -31,36 +31,27 @@ public class ScheduleTimeService {
     @Transactional
     public void create(Long scheduleId, List<String> timeTable, Long memberId) {
         try {
-            Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(() -> new ScheduleException(ErrorCode.SCHEDULE_NOT_FOUND));
+            Schedule schedule = scheduleRepository.findById(scheduleId)
+                    .orElseThrow(() -> new ScheduleException(ErrorCode.SCHEDULE_NOT_FOUND));
 
-            // 해당 사용자가 등록한 타임 테이블에서 중복된 시간을 등록했는지 체크
-            validateDuplicatedTimeTable(timeTable, memberId, schedule);
+            ScheduleTime scheduleTime = schedule.getScheduleTimes().stream()
+                    .filter(st -> st.getMemberId().equals(memberId))
+                    .findFirst()
+                    .orElseThrow(() -> new ScheduleException(ErrorCode.SCHEDULE_TIME_NOT_FOUND));
 
-            ScheduleTime scheduleTime = ScheduleTime.create(schedule, memberId);
+            scheduleTime.getTimeTables().clear();
+            timeTableRepository.deleteAllByScheduleTime(scheduleTime);
+
+            // 새로운 시간 추가
             for (String time : timeTable) {
                 TimeTable entity = TimeTable.create(scheduleTime, time);
                 timeTableRepository.save(entity);
+                scheduleTime.getTimeTables().add(entity);
             }
             scheduleTimeRepository.save(scheduleTime);
         } catch (ConstraintViolationException e) {
             throw new CustomException(ErrorCode.BODY_NOT_EMPTY);
         }
-    }
-
-    private void validateDuplicatedTimeTable(List<String> timeTable, Long memberId, Schedule schedule) {
-        schedule.getScheduleTimes().stream()
-                .filter(scheduleTime -> scheduleTime.getMemberId().equals(memberId))
-                .findFirst()
-                .ifPresent(scheduleTime -> {
-                    List<String> existingTimes = scheduleTime.getTimeTables().stream()
-                            .map(TimeTable::getTime).toList();
-
-                    for (String time : timeTable) {
-                        if (existingTimes.contains(time)) {
-                            throw new ScheduleException(ErrorCode.DUPLICATE_TIME);
-                        }
-                    }
-                });
     }
 
     // 해당 스케쥴 상세 조회

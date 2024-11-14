@@ -50,6 +50,7 @@ public class SecurityConfig {
                 // 특정 URL에 대한 권한 설정.
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/", "/swagger", "/swagger-ui/index.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/api/model/**").permitAll()
                         // 추가적인 URL 권한 설정
                         .anyRequest().authenticated() // 그 외 요청은 인증 필요.
                 )

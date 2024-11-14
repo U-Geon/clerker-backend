@@ -106,4 +106,13 @@ public class MeetingService {
         meeting.setStatus(status);
         return meeting;
     }
+
+    // 미팅을 PENDING 상태로 설정
+    @Transactional
+    public Meeting setMeetingPendingStatus(Long meetingId) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUND));
+        meeting.setStatus(Status.PENDING);
+        return meeting;
+    }
 }

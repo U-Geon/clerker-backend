@@ -32,7 +32,7 @@ public class Meeting {
     @Column(name = "start_date", nullable = false, updatable = false)
     private LocalDateTime startDate;
 
-    @Column(name = "is_ended", nullable = false)
+    @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
     private Status status;
 

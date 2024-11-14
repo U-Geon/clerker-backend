@@ -46,18 +46,23 @@ public class ModelService {
             // 2. 변환된 mp3 파일을 S3에 업로드
             String mp3FileUrl = s3FileService.uploadFile("mp3File", mp3File.getOriginalFilename(), mp3File);
 
+            log.info("mp3FileUrl: {}", mp3FileUrl);
+
             // 3. 모델 서버에 전송할 DTO 생성
             WebClient webClient = webClientBuilder.baseUrl(baseUrl).build();
             ModelRequestDTO modelRequestDTO = new ModelRequestDTO(domain, mp3FileUrl);
 
+            log.info("modelRequestDTO: {}", modelRequestDTO);
+
             // 4. WebClient를 사용하여 모델 서버에 요청 보내기
             return webClient.post()
-                    .uri("/model_serve")
+                    .uri("/endpoints/clerker-ai/invocations")
+                    .header("Content-Type", "application/json") // SageMaker 엔드포인트가 JSON을 처리한다고 가정
                     .body(BodyInserters.fromValue(modelRequestDTO))
                     .retrieve()
                     .bodyToMono(ModelResponseDTO.class)
                     .doOnNext(response -> processModelResponse(response, meetingId, domain)) // 받은 ModelResponseDTO를 통한 로직 실행.
-                    .doFinally(signalType -> closeMp3File(mp3File, meetingId));
+                    .doFinally(signalType -> closeMp3File(mp3File));
         } catch (IOException e) {
             log.error("파일 변환 중 IO 에러 발생: {}", e.getMessage());
             return Mono.error(new IllegalStateException("파일 변환 중 IO 에러 발생: " + e.getMessage(), e));
@@ -76,6 +81,8 @@ public class ModelService {
 
     // 받은 ModelResponseDTO를 통한 로직 실행.
     private void processModelResponse(ModelResponseDTO response, Long meetingId, String domain) {
+        log.info("processModelResponse 실행");
+
         // meeting 엔티티 컬럼 변경 (회의 종료)
         meetingService.endMeeting(meetingId, domain);
 
@@ -223,7 +230,7 @@ public class ModelService {
     }
 
     // s3 업로드 후 로컬 환경에 설치되는 mp3 파일 삭제
-    private void closeMp3File(MultipartFile mp3File, Long meetingId) {
+    private void closeMp3File(MultipartFile mp3File) {
         try {
             if (mp3File != null) {
                 mp3File.getInputStream();

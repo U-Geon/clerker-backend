@@ -112,21 +112,21 @@ public class ModelService {
         ModelResponseDTO responseDTO = objectMapper.readValue(responseBody, ModelResponseDTO.class);
 
         // 받은 ModelResponseDTO를 통한 로직 실행
-        processModelResponse(responseDTO, meetingId, domain);
+        processModelResponse(responseDTO, meetingId);
     }
 
     //테스트용
     @Transactional
-    public void testProcessModelResponse(ModelResponseDTO response, Long meetingId, String domain) {
+    public void testProcessModelResponse(ModelResponseDTO response) {
+        Long meetingId = response.meetingId();
         meetingService.endMeeting(Status.COMPLETE, meetingId);
-        processModelResponse(response, meetingId, domain);
+        processModelResponse(response, meetingId);
     }
 
     // 받은 ModelResponseDTO를 통한 로직 실행.
-    private void processModelResponse(ModelResponseDTO response, Long meetingId, String domain) {
+    private void processModelResponse(ModelResponseDTO response, Long meetingId) {
         // meeting 엔티티 컬럼 변경 (모델링 시작)
-        Meeting meeting = meetingService.endMeeting(Status.PENDING, meetingId);
-        meeting.setDomain(domain);
+        meetingService.endMeeting(Status.PENDING, meetingId);
 
         // 여기서 받은 url들을 토대로 파일을 s3에 저장한 뒤 DB에 버킷 경로 저장
         try {

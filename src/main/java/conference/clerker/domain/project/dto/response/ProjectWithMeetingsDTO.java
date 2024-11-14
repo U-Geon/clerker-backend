@@ -1,6 +1,7 @@
 package conference.clerker.domain.project.dto.response;
 
 import conference.clerker.domain.meeting.schema.Meeting;
+import conference.clerker.domain.meeting.schema.Status;
 import conference.clerker.domain.project.schema.Project;
 
 import java.util.List;
@@ -17,7 +18,7 @@ public record ProjectWithMeetingsDTO(
                 project.getName(),
                 project.getChildProjects(),
                 project.getMeetings().stream()
-                        .filter(Meeting::getIsEnded)
+                        .filter(meeting -> meeting.getStatus().equals(Status.COMPLETE))
                         .map(MeetingDTO::new)
                         .toList()
         );

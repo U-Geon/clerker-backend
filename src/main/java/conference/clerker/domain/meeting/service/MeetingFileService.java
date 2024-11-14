@@ -6,7 +6,7 @@ import conference.clerker.domain.meeting.schema.FileType;
 import conference.clerker.domain.meeting.schema.Meeting;
 import conference.clerker.domain.meeting.schema.MeetingFile;
 import conference.clerker.global.exception.ErrorCode;
-import conference.clerker.global.exception.domain.AuthException;
+import conference.clerker.global.exception.domain.MeetingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,11 +21,10 @@ public class MeetingFileService {
 
     @Transactional
     public MeetingFile create(Long meetingId, FileType fileType, String url, String name){
-        Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new AuthException(ErrorCode.MEETING_NOT_FOUND));
+        Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUND));
 
-        MeetingFile meetingFIle = MeetingFile.create(meeting, fileType, url, name);
+        MeetingFile meetingFile = MeetingFile.create(meeting, fileType, url, name);
 
-        return meetingFileRepository.save(meetingFIle);
+        return meetingFileRepository.save(meetingFile);
     }
 }

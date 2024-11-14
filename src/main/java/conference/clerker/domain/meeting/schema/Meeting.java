@@ -33,7 +33,8 @@ public class Meeting {
     private LocalDateTime startDate;
 
     @Column(name = "is_ended", nullable = false)
-    private Boolean isEnded;
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     @CreatedDate
     @Column(updatable = false)
@@ -51,7 +52,7 @@ public class Meeting {
                 .project(project)
                 .url(url)
                 .startDate(requestDTO.startDateTime())
-                .isEnded(false)
+                .status(Status.IN_PROGRESS)
                 .createdAt(LocalDateTime.now())
                 .build();
     }

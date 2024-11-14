@@ -37,18 +37,24 @@ public class ScheduleTimeService {
             ScheduleTime scheduleTime = schedule.getScheduleTimes().stream()
                     .filter(st -> st.getMemberId().equals(memberId))
                     .findFirst()
-                    .orElseThrow(() -> new ScheduleException(ErrorCode.SCHEDULE_TIME_NOT_FOUND));
+                    .orElse(null);
 
-            scheduleTime.getTimeTables().clear();
-            timeTableRepository.deleteAllByScheduleTime(scheduleTime);
+            if (scheduleTime == null) {
+                scheduleTime = ScheduleTime.create(schedule, memberId);
+                scheduleTimeRepository.save(scheduleTime);  // 먼저 영속화
+                schedule.getScheduleTimes().add(scheduleTime);  // schedule에 추가
+            } else {
+                scheduleTime.getTimeTables().clear();
+                timeTableRepository.deleteAllByScheduleTime(scheduleTime);
+            }
 
-            // 새로운 시간 추가
             for (String time : timeTable) {
                 TimeTable entity = TimeTable.create(scheduleTime, time);
                 timeTableRepository.save(entity);
                 scheduleTime.getTimeTables().add(entity);
             }
-            scheduleTimeRepository.save(scheduleTime);
+
+            scheduleRepository.save(schedule);
         } catch (ConstraintViolationException e) {
             throw new CustomException(ErrorCode.BODY_NOT_EMPTY);
         }

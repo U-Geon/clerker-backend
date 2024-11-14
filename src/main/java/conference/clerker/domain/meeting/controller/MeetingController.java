@@ -3,18 +3,15 @@ package conference.clerker.domain.meeting.controller;
 import conference.clerker.domain.meeting.dto.request.CreateMeetingRequestDTO;
 import conference.clerker.domain.meeting.dto.response.MeetingResultDTO;
 import conference.clerker.domain.meeting.schema.Meeting;
+import conference.clerker.domain.meeting.schema.Status;
 import conference.clerker.domain.meeting.service.MeetingService;
 import conference.clerker.domain.notification.service.NotificationService;
 import conference.clerker.domain.organization.service.OrganizationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.net.URI;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -59,9 +56,11 @@ public class MeetingController {
 
         Meeting meeting = meetingService.findById(meetingId);
 
-        if (meeting.getIsEnded()) {
+        if (meeting.getStatus() == Status.COMPLETE) {
             return ResponseEntity.status(HttpStatus.FOUND)
                     .body(meetingService.redirectToMeetingDetailPage(meetingId));
+        } else if(meeting.getStatus() == Status.PENDING) {
+            return ResponseEntity.status(428).body("모델링 진행중입니다.");
         }
         return ResponseEntity.ok(meeting);
     }

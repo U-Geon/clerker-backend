@@ -56,7 +56,7 @@ public class ModelService {
                     .body(BodyInserters.fromValue(modelRequestDTO))
                     .retrieve()
                     .bodyToMono(ModelResponseDTO.class)
-                    .doOnNext(response -> processModelResponse(response, meetingId)) // 받은 ModelResponseDTO를 통한 로직 실행.
+                    .doOnNext(response -> processModelResponse(response, meetingId, domain)) // 받은 ModelResponseDTO를 통한 로직 실행.
                     .doFinally(signalType -> closeMp3File(mp3File, meetingId));
         } catch (IOException e) {
             log.error("파일 변환 중 IO 에러 발생: {}", e.getMessage());
@@ -69,15 +69,15 @@ public class ModelService {
 
     //테스트용
     @Transactional
-    public void testProcessModelResponse(ModelResponseDTO response, Long meetingId) {
-        meetingService.setEnded(meetingId);
-        processModelResponse(response, meetingId);
+    public void testProcessModelResponse(ModelResponseDTO response, Long meetingId, String domain) {
+        meetingService.endMeeting(meetingId, domain);
+        processModelResponse(response, meetingId, domain);
     }
 
     // 받은 ModelResponseDTO를 통한 로직 실행.
-    private void processModelResponse(ModelResponseDTO response, Long meetingId) {
+    private void processModelResponse(ModelResponseDTO response, Long meetingId, String domain) {
         // meeting 엔티티 컬럼 변경 (회의 종료)
-        meetingService.setEnded(meetingId);
+        meetingService.endMeeting(meetingId, domain);
 
         // 여기서 받은 url들을 토대로 파일을 s3에 저장한 뒤 DB에 버킷 경로 저장
         try {

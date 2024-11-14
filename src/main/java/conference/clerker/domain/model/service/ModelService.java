@@ -185,7 +185,7 @@ public class ModelService {
 
             // ffmpeg 실행 경로 설정 필요
             ProcessBuilder processBuilder = new ProcessBuilder(
-                    "/opt/homebrew/bin/ffmpeg", // 실제 ffmpeg 경로로 변경 필요
+                    "/usr/bin/ffmpeg", // 실제 ffmpeg 경로로 변경 필요
                     "-i", tempWebmFile.getAbsolutePath(),
                     "-codec:a", "libmp3lame",
                     "-b:a", "128k",

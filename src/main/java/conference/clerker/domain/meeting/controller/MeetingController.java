@@ -57,10 +57,9 @@ public class MeetingController {
         Meeting meeting = meetingService.findById(meetingId);
 
         if (meeting.getStatus() == Status.COMPLETE) {
-            return ResponseEntity.status(HttpStatus.FOUND)
-                    .body(meetingService.redirectToMeetingDetailPage(meetingId));
+            return ResponseEntity.status(HttpStatus.SEE_OTHER).body(meetingService.redirectToMeetingDetailPage(meetingId));
         } else if(meeting.getStatus() == Status.PENDING) {
-            return ResponseEntity.status(428).body("모델링 진행중입니다.");
+            return ResponseEntity.status(HttpStatus.PROCESSING).body("모델링이 진행중 입니다.");
         }
         return ResponseEntity.ok(meeting);
     }

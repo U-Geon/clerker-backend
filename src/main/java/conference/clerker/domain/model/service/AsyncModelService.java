@@ -3,6 +3,7 @@ package conference.clerker.domain.model.service;
 import com.amazonaws.services.sagemakerruntime.AmazonSageMakerRuntime;
 import com.amazonaws.services.sagemakerruntime.model.InvokeEndpointRequest;
 import com.amazonaws.services.sagemakerruntime.model.InvokeEndpointResult;
+import conference.clerker.domain.meeting.schema.Status;
 import conference.clerker.domain.model.dto.request.ModelRequestDTO;
 import conference.clerker.domain.model.dto.response.ModelResponseDTO;
 import conference.clerker.global.aws.s3.S3FileService;
@@ -59,7 +60,7 @@ public class AsyncModelService {
             log.info("SageMaker 응답: {}", responseBody);
             ModelResponseDTO responseDTO = objectMapper.readValue(responseBody, ModelResponseDTO.class);
 
-            processModelResponse(responseDTO, meetingId, domain);
+            processModelResponse(responseDTO, meetingId);
 
         } catch (Exception e) {
             log.error("모델 서버 호출 중 오류 발생: {}", e.getMessage(), e);
@@ -68,10 +69,10 @@ public class AsyncModelService {
         }
     }
 
-    private void processModelResponse(ModelResponseDTO response, Long meetingId, String domain) {
+    private void processModelResponse(ModelResponseDTO response, Long meetingId) {
         log.info("processModelResponse 실행");
 
-        meetingService.endMeeting(meetingId, domain);
+        meetingService.endMeeting(Status.COMPLETE, meetingId);
         try {
             Map<String, String> imageUrlMap = s3FileService.transferZipContentFromOtherS3(
                     modelServerBucketName, response.diagram_image(), "images", meetingId);

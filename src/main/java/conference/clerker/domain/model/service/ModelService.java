@@ -21,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,7 +29,6 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 @Service
 @Transactional(readOnly = true)
@@ -41,7 +39,6 @@ public class ModelService {
     private final MeetingFileService meetingFileService;
     private final S3FileService s3FileService;
     private final MeetingService meetingService;
-    private final AsyncModelService asyncModelService;
 
     // AWS 자격 증명을 설정하기 위해 필요한 값 주입
     @Value("${other.aws.access-key}")
@@ -76,11 +73,10 @@ public class ModelService {
             String mp3FileUrl = s3FileService.uploadFile("mp3File", mp3File.getOriginalFilename(), mp3File);
             log.info("mp3FileUrl: {}", mp3FileUrl);
 
-            ModelRequestDTO modelRequestDTO = new ModelRequestDTO(domain, mp3FileUrl);
+            ModelRequestDTO modelRequestDTO = new ModelRequestDTO(domain, mp3FileUrl, meetingId);
             log.info("modelRequestDTO: {}", modelRequestDTO);
 
-            // AsyncModelService에서 비동기 요청 실행
-            asyncModelService.invokeModelServerAsync(modelRequestDTO, mp3File, meetingId, domain);
+            invokeModelServer(modelRequestDTO, meetingId, domain);
 
             return ResponseEntity.accepted().body("추론 요청이 접수되었습니다.");
 
@@ -90,19 +86,6 @@ public class ModelService {
         } catch (Exception e) {
             log.error("예기치 않은 에러 발생: {}", e.getMessage());
             return ResponseEntity.status(500).body("예기치 않은 에러 발생: " + e.getMessage());
-        }
-    }
-
-    @Async
-    @Transactional
-    public void invokeModelServerAsync(ModelRequestDTO modelRequestDTO, MultipartFile mp3File, Long meetingId, String domain) {
-        log.info("invokeModelServerAsync 호출: meetingId={}, domain={}", meetingId, domain);
-        try {
-            invokeModelServer(modelRequestDTO, meetingId, domain);
-        } catch (Exception e) {
-            log.error("모델 서버 호출 중 오류 발생: {}", e.getMessage(), e);
-        } finally {
-            closeMp3File(mp3File);
         }
     }
 

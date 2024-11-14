@@ -39,7 +39,7 @@ public class S3FileService {
         this.amazonS3 = amazonS3;
         this.presigner = S3Presigner.builder()
                 .credentialsProvider(otherAccountCredentialsProvider)
-                .region(Region.of("us-west-2"))
+                .region(Region.of("us-east-1"))
                 .build();
     }
 

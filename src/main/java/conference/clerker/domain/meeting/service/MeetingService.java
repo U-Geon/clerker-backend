@@ -16,7 +16,9 @@ import conference.clerker.global.exception.CustomException;
 import conference.clerker.global.exception.ErrorCode;
 import conference.clerker.global.exception.domain.AuthException;
 import conference.clerker.global.exception.domain.MeetingException;
+import java.util.HashMap;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +30,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class MeetingService {
+
+    @Value("${baseUrl.front}")
+    private String frontUrl;
 
     private final MeetingRepository meetingRepository;
     private final ProjectRepository projectRepository;
@@ -58,21 +63,31 @@ public class MeetingService {
     }
 
     public Meeting findById(Long id) {
-        return meetingRepository.findById(id).orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUND));
+        return meetingRepository.findById(id)
+                .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUND));
     }
 
-    public MeetingResultDTO findByIdAndMeetingFileId(Long meetingId) {
+    public Map<String, String> redirectToMeetingDetailPage(Long meetingId) {
+        String redirectionUrl = frontUrl + "/project/summary/" + meetingId;
+
+        Map<String, String> body = new HashMap<>();
+        body.put("redirectUrl", redirectionUrl);
+
+        return body;
+    }
+
+    // 미팅 파일 목록 조회
+    public MeetingResultDTO findMeetingFiles(Long meetingId) {
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new RuntimeException("Meeting not found id: " + meetingId));
 
-        Map<FileType, List<MeetingFIleDTO>> filesByType = meetingFileRepository.findByMeetingId(meetingId).stream()
-                .filter(file -> file.getFileType() != FileType.IMAGE) // IMAGE 타입을 제외
-                .collect(Collectors.groupingBy(
+        Map<FileType, MeetingFIleDTO> filesByType = meetingFileRepository.findByMeetingId(meetingId).stream()
+                .filter(file -> file.getFileType() != FileType.IMAGE)
+                .collect(Collectors.toMap(
                         MeetingFile::getFileType,
-                        Collectors.mapping(MeetingFIleDTO::new, Collectors.toList())
+                        MeetingFIleDTO::new,
+                        (existing, replacement) -> replacement // 충돌 발생 시, 최신 파일로 대체
                 ));
-
-
 
         return new MeetingResultDTO(
                 meeting.getId(),
@@ -80,5 +95,13 @@ public class MeetingService {
                 meeting.getDomain(),
                 filesByType
         );
+    }
+
+    @Transactional
+    public void endMeeting(Long meetingId, String domain) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUND));
+        meeting.setIsEnded(true);
+        meeting.setDomain(domain);
     }
 }

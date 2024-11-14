@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -30,10 +29,12 @@ public class AuthController {
             @Parameter(description = "프로필 사진", required = true, content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE))
             @RequestPart("profileImage") MultipartFile profileImage,
             @Parameter(description = "변경하려는 username", required = true)
-            @RequestPart("username") String username) {
-        authService.update(principal.getMember().getId(), profileImage, username);
-
-        return ResponseEntity.noContent().build();
+            @Valid @RequestPart("username") String username) {
+        String accessToken = authService.update(principal.getMember().getId(), profileImage, username);
+        if(accessToken == null) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.noContent().header("Authorization", "Bearer " + accessToken).build();
     }
 
 }

@@ -58,4 +58,11 @@ public class AuthService {
         }
         return new ProfileModifyResponseDTO(profileURL, username);
     }
+
+    public Profile findProfile(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new AuthException(ErrorCode.MEMBER_NOT_FOUND));
+
+        return profileRepository.findByMember(member).orElse(null);
+    }
 }

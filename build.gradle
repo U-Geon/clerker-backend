@@ -34,6 +34,7 @@ dependencies {
 
 	//aws
 	implementation 'io.awspring.cloud:spring-cloud-starter-aws:2.4.4'
+	implementation 'com.amazonaws:aws-java-sdk-sagemakerruntime:1.12.762'
 
 	//aws s3 접근
 	implementation 'software.amazon.awssdk:s3:2.28.29'

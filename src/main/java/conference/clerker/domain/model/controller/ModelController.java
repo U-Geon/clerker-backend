@@ -53,12 +53,10 @@ public class ModelController {
                     + "3. 클라이언트에게 md file + raw text 반환"
     )
     public ResponseEntity<String> testProcessResponse(
-            @RequestParam("meetingId") Long meetingId, // 파라미터 이름 명시
-            @RequestParam("domain") String domain,
             @RequestBody ModelResponseDTO response
     ) {
         try {
-            modelService.testProcessModelResponse(response, meetingId, domain);
+            modelService.testProcessModelResponse(response);
             return ResponseEntity.ok("processModelResponse 메서드가 성공적으로 실행되었습니다.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

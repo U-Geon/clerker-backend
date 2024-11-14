@@ -2,7 +2,6 @@ package conference.clerker.domain.member.controller;
 
 
 import conference.clerker.domain.member.dto.response.ProfileModifyResponseDTO;
-import conference.clerker.domain.member.schema.Profile;
 import conference.clerker.domain.member.service.AuthService;
 import conference.clerker.global.oauth2.service.OAuth2UserPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,7 +35,7 @@ public class AuthController {
 
     @GetMapping("/profile")
     @Operation(summary = "사용자 프로필 url 조회")
-    public ResponseEntity<Profile> getProfileUrl(
+    public ResponseEntity<ProfileModifyResponseDTO> getProfileUrl(
             @AuthenticationPrincipal OAuth2UserPrincipal principal
     ) {
         return ResponseEntity.ok().body(authService.findProfile(principal.getMember().getId()));

@@ -81,6 +81,8 @@ public class MeetingService {
     public MeetingResultDTO findMeetingFiles(Long meetingId) {
         Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUND));
 
+        if(meeting.getStatus() != Status.COMPLETE) throw new MeetingException(ErrorCode.MEETING_NOT_END);
+
         Map<FileType, MeetingFIleDTO> filesByType = meetingFileRepository.findByMeetingId(meetingId).stream()
                 .filter(file -> file.getFileType() != FileType.IMAGE)
                 .collect(Collectors.toMap(

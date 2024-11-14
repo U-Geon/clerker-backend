@@ -2,6 +2,7 @@ package conference.clerker.domain.schedule.schema;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import java.util.ArrayList;
 import lombok.*;
 
 import java.util.List;
@@ -30,6 +31,7 @@ public class ScheduleTime {
 
     public static ScheduleTime create(Schedule schedule, Long memberId) {
         return ScheduleTime.builder()
+                .timeTables(new ArrayList<>())
                 .schedule(schedule)
                 .memberId(memberId)
                 .build();

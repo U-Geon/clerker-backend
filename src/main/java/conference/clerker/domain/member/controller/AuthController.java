@@ -26,7 +26,7 @@ public class AuthController {
     @Operation(summary = "프로필 수정 API", description = "프로필 사진 업데이트")
     public ResponseEntity<ProfileModifyResponseDTO> update(
             @AuthenticationPrincipal OAuth2UserPrincipal principal,
-            @Parameter(description = "프로필 사진", required = true, content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE))
+            @Parameter(description = "프로필 사진", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE))
             @RequestPart("profileImage") MultipartFile profileImage,
             @Parameter(description = "변경하려는 username", required = true)
             @RequestPart("username") String username) {

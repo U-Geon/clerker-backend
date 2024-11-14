@@ -1,5 +1,6 @@
 package conference.clerker.domain.model.service;
 
+import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.sagemakerruntime.AmazonSageMakerRuntime;
@@ -60,12 +61,17 @@ public class ModelService {
     @PostConstruct
     private void init() {
         BasicAWSCredentials awsCreds = new BasicAWSCredentials(accessKey, secretKey);
+        ClientConfiguration clientConfig = new ClientConfiguration()
+                .withMaxErrorRetry(0)             // 자동 재시도 비활성화
+                .withConnectionTimeout(10_000)     // 연결 타임아웃 설정 (예: 10초)
+                .withSocketTimeout(600_000);       // 소켓 타임아웃 설정 (예: 5분)
+
         this.sagemakerRuntimeClient = AmazonSageMakerRuntimeClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
-                .withRegion("us-east-1") // 실제 AWS 리전으로 변경하세요
+                .withClientConfiguration(clientConfig) // 타임아웃 및 재시도 설정 추가
+                .withRegion("us-east-1")               // 실제 AWS 리전으로 변경하세요
                 .build();
     }
-
     @Transactional
     public ResponseEntity<String> sendToModelServer(String domain, MultipartFile webmFile, Long meetingId) {
         try {
@@ -185,7 +191,7 @@ public class ModelService {
 
             // ffmpeg 실행 경로 설정 필요
             ProcessBuilder processBuilder = new ProcessBuilder(
-                    "/usr/bin/ffmpeg", // 실제 ffmpeg 경로로 변경 필요
+                    "/opt/homebrew/bin/ffmpeg", // 실제 ffmpeg 경로로 변경 필요
                     "-i", tempWebmFile.getAbsolutePath(),
                     "-codec:a", "libmp3lame",
                     "-b:a", "128k",

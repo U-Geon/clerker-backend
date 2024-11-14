@@ -51,7 +51,7 @@ public class Meeting {
                 .domain(requestDTO.domain())
                 .project(project)
                 .url(url)
-                .startDate(requestDTO.startDateTime())
+                .startDate(requestDTO.getStartTimeAsLocalTime())
                 .status(Status.IN_PROGRESS)
                 .createdAt(LocalDateTime.now())
                 .build();

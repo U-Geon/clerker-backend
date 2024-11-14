@@ -10,6 +10,7 @@ import conference.clerker.domain.organization.service.OrganizationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -28,18 +29,18 @@ public class MeetingController {
 
 
     @PostMapping("/create/{projectID}")
-    @Operation(summary = "미팅 생성 API", description = "1. 알림 생성 체크 시 프로젝트 내 멤버들에게 알림 생성\n2. startDateTime은 YYYY-MM-DDTHH:mm ex)2024-10-17T09:00")
+    @Operation(summary = "미팅 생성 API", description = "1. 알림 생성 체크 시 프로젝트 내 멤버들에게 알림 생성\n2. startDateTime은 YYYY-MM-DDTHH:mm ex)2024-10-17T09:00:00")
     public ResponseEntity<Void> createMeeting(
             @Parameter(required = true, description = "프로젝트 ID", in = ParameterIn.PATH)
             @PathVariable("projectID") Long projectId,
-            @RequestBody CreateMeetingRequestDTO requestDTO) {
+            @Valid @RequestBody CreateMeetingRequestDTO requestDTO) {
         meetingService.create(projectId, requestDTO);
         if (requestDTO.isNotify()) {
             organizationService.findMembersByProjectId(projectId).forEach(
                     target -> notificationService.notify(target.getId(),
                             projectId,
                             requestDTO.name(),
-                            requestDTO.startDateTime(),
+                            requestDTO.getStartTimeAsLocalTime(),
                             "회의"
                     )
             );

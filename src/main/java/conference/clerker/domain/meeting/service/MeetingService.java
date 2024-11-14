@@ -43,19 +43,17 @@ public class MeetingService {
     // 미팅 생성
     @Transactional
     public void create(Long projectId, CreateMeetingRequestDTO requestDTO) {
-        try {
-            Project project = projectRepository.findById(projectId).orElseThrow(()
-                    -> new AuthException(ErrorCode.PROJECT_NOT_FOUND));
 
-            String googleMeetUrl = googleMeetService.createMeeting(requestDTO.name(), requestDTO.startDateTime());
+        Project project = projectRepository.findById(projectId).orElseThrow(()
+                -> new AuthException(ErrorCode.PROJECT_NOT_FOUND));
 
-            Meeting meeting = Meeting.create(project, requestDTO.name(), googleMeetUrl, requestDTO);
-            meeting.setProject(project);
-            project.getMeetings().add(meeting);
-            meetingRepository.save(meeting);
-        } catch (NullPointerException e) {
-            throw new CustomException(ErrorCode.BODY_VALUE_NOT_FOUND);
-        }
+        String googleMeetUrl = googleMeetService.createMeeting(requestDTO.name(), requestDTO.getStartTimeAsLocalTime());
+
+        Meeting meeting = Meeting.create(project, requestDTO.name(), googleMeetUrl, requestDTO);
+        meeting.setProject(project);
+        project.getMeetings().add(meeting);
+        meetingRepository.save(meeting);
+
     }
 
     // project ID를 통한 미팅 목록 조회

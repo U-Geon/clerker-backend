@@ -10,6 +10,7 @@ import conference.clerker.domain.meeting.repository.MeetingRepository;
 import conference.clerker.domain.meeting.schema.FileType;
 import conference.clerker.domain.meeting.schema.Meeting;
 import conference.clerker.domain.meeting.schema.MeetingFile;
+import conference.clerker.domain.meeting.schema.Status;
 import conference.clerker.domain.project.repository.ProjectRepository;
 import conference.clerker.domain.project.schema.Project;
 import conference.clerker.global.exception.CustomException;
@@ -78,8 +79,7 @@ public class MeetingService {
 
     // 미팅 파일 목록 조회
     public MeetingResultDTO findMeetingFiles(Long meetingId) {
-        Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new RuntimeException("Meeting not found id: " + meetingId));
+        Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUND));
 
         Map<FileType, MeetingFIleDTO> filesByType = meetingFileRepository.findByMeetingId(meetingId).stream()
                 .filter(file -> file.getFileType() != FileType.IMAGE)
@@ -101,7 +101,7 @@ public class MeetingService {
     public void endMeeting(Long meetingId, String domain) {
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUND));
-        meeting.setIsEnded(true);
+        meeting.setStatus(Status.PENDING);
         meeting.setDomain(domain);
     }
 }

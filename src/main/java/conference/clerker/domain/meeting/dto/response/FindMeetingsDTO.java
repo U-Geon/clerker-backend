@@ -1,6 +1,7 @@
 package conference.clerker.domain.meeting.dto.response;
 
 import conference.clerker.domain.meeting.schema.Meeting;
+import conference.clerker.domain.meeting.schema.Status;
 import java.time.LocalDateTime;
 
 public record FindMeetingsDTO(
@@ -9,7 +10,7 @@ public record FindMeetingsDTO(
         String domain,
         String url,
         LocalDateTime startDate,
-        Boolean isEnded,
+        Status status,
         LocalDateTime createdAt
 ) {
     public FindMeetingsDTO(Meeting meeting) {
@@ -19,7 +20,7 @@ public record FindMeetingsDTO(
                 meeting.getDomain(),
                 meeting.getUrl(),
                 meeting.getStartDate(),
-                meeting.getIsEnded(),
+                meeting.getStatus(),
                 meeting.getCreatedAt()
         );
     }

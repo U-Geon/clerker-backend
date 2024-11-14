@@ -98,10 +98,10 @@ public class MeetingService {
     }
 
     @Transactional
-    public void endMeeting(Long meetingId, String domain) {
+    public Meeting endMeeting(Status status, Long meetingId) {
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUND));
-        meeting.setStatus(Status.PENDING);
-        meeting.setDomain(domain);
+        meeting.setStatus(status);
+        return meeting;
     }
 }

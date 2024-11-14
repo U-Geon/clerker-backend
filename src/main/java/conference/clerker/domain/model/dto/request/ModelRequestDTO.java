@@ -7,5 +7,7 @@ public record ModelRequestDTO(
         @NotEmpty
         String domain,
         @NotBlank
-        String mp3FileUrl
+        String mp3FileUrl,
+        @NotBlank
+        Long meetingId
 ) {}

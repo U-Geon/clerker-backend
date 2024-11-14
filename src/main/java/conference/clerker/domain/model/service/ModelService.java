@@ -1,5 +1,11 @@
 package conference.clerker.domain.model.service;
 
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.sagemakerruntime.AmazonSageMakerRuntime;
+import com.amazonaws.services.sagemakerruntime.AmazonSageMakerRuntimeClientBuilder;
+import com.amazonaws.services.sagemakerruntime.model.InvokeEndpointRequest;
+import com.amazonaws.services.sagemakerruntime.model.InvokeEndpointResult;
 import com.amazonaws.util.IOUtils;
 import conference.clerker.domain.meeting.schema.FileType;
 import conference.clerker.domain.meeting.schema.Meeting;
@@ -9,18 +15,20 @@ import conference.clerker.domain.meeting.service.MeetingService;
 import conference.clerker.domain.model.dto.request.ModelRequestDTO;
 import conference.clerker.domain.model.dto.response.ModelResponseDTO;
 import conference.clerker.global.aws.s3.S3FileService;
-import java.io.*;
-import java.util.Map;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
+
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 @Service
 @Transactional(readOnly = true)
@@ -29,44 +37,82 @@ import reactor.core.publisher.Mono;
 public class ModelService {
 
     private final MeetingFileService meetingFileService;
-    @Value("${baseUrl.model}")
-    private String baseUrl;
+    private final S3FileService s3FileService;
+    private final MeetingService meetingService;
+
+    // AWS 자격 증명을 설정하기 위해 필요한 값 주입
+    @Value("${other.aws.access-key}")
+    private String accessKey;
+
+    @Value("${other.aws.secret-key}")
+    private String secretKey;
+
+    @Value("${other.aws.sagemaker.endpoint}")
+    private String endpointName;
 
     @Value("${other.aws.s3.bucket}")
     private String modelServerBucketName;
 
-    private final WebClient.Builder webClientBuilder;
-    private final S3FileService s3FileService;
-    private final MeetingService meetingService;
+    // AWS SDK의 SageMakerRuntime 클라이언트
+    private AmazonSageMakerRuntime sagemakerRuntimeClient;
+
+    // 초기화 블록 또는 생성자에서 AWS 클라이언트 설정
+    @PostConstruct
+    private void init() {
+        BasicAWSCredentials awsCreds = new BasicAWSCredentials(accessKey, secretKey);
+        this.sagemakerRuntimeClient = AmazonSageMakerRuntimeClientBuilder.standard()
+                .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
+                .withRegion("us-east-1") // 실제 AWS 리전으로 변경하세요
+                .build();
+    }
 
     @Transactional
-    public Mono<ModelResponseDTO> sendToModelServer(String domain, MultipartFile webmFile, Long meetingId) {
+    public ResponseEntity<String> sendToModelServer(String domain, MultipartFile webmFile, Long meetingId) {
         try {
-            // 1. webm 파일을 mp3로 변환
             MultipartFile mp3File = convertWebmToMp3(webmFile);
-
-            // 2. 변환된 mp3 파일을 S3에 업로드
             String mp3FileUrl = s3FileService.uploadFile("mp3File", mp3File.getOriginalFilename(), mp3File);
+            log.info("mp3FileUrl: {}", mp3FileUrl);
 
-            // 3. 모델 서버에 전송할 DTO 생성
-            WebClient webClient = webClientBuilder.baseUrl(baseUrl).build();
-            ModelRequestDTO modelRequestDTO = new ModelRequestDTO(domain, mp3FileUrl);
+            ModelRequestDTO modelRequestDTO = new ModelRequestDTO(domain, mp3FileUrl, meetingId);
+            log.info("modelRequestDTO: {}", modelRequestDTO);
 
-            // 4. WebClient를 사용하여 모델 서버에 요청 보내기
-            return webClient.post()
-                    .uri("/model_serve")
-                    .body(BodyInserters.fromValue(modelRequestDTO))
-                    .retrieve()
-                    .bodyToMono(ModelResponseDTO.class)
-                    .doOnNext(response -> processModelResponse(response, meetingId, domain)) // 받은 ModelResponseDTO를 통한 로직 실행.
-                    .doFinally(signalType -> closeMp3File(mp3File, meetingId));
+            invokeModelServer(modelRequestDTO, meetingId, domain);
+
+            return ResponseEntity.accepted().body("추론 요청이 접수되었습니다.");
+
         } catch (IOException e) {
             log.error("파일 변환 중 IO 에러 발생: {}", e.getMessage());
-            return Mono.error(new IllegalStateException("파일 변환 중 IO 에러 발생: " + e.getMessage(), e));
+            return ResponseEntity.status(500).body("파일 변환 중 IO 에러 발생: " + e.getMessage());
         } catch (Exception e) {
             log.error("예기치 않은 에러 발생: {}", e.getMessage());
-            return Mono.error(new IllegalStateException("예기치 않은 에러 발생: " + e.getMessage(), e));
+            return ResponseEntity.status(500).body("예기치 않은 에러 발생: " + e.getMessage());
         }
+    }
+
+
+    private void invokeModelServer(ModelRequestDTO modelRequestDTO, Long meetingId, String domain) throws IOException {
+        log.info("invokeModelServer 호출: meetingId={}, domain={}", meetingId, domain);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String payload = objectMapper.writeValueAsString(modelRequestDTO);
+
+        // SageMaker 엔드포인트 호출 요청 생성
+        InvokeEndpointRequest invokeEndpointRequest = new InvokeEndpointRequest()
+                .withEndpointName(endpointName)
+                .withContentType("application/json")
+                .withBody(ByteBuffer.wrap(payload.getBytes(StandardCharsets.UTF_8)));
+
+        // SageMaker 엔드포인트 호출
+        InvokeEndpointResult invokeEndpointResult = sagemakerRuntimeClient.invokeEndpoint(invokeEndpointRequest);
+
+        // 응답을 문자열로 변환
+        String responseBody = StandardCharsets.UTF_8.decode(invokeEndpointResult.getBody()).toString();
+
+        // 응답 JSON을 ModelResponseDTO로 변환
+        ModelResponseDTO responseDTO = objectMapper.readValue(responseBody, ModelResponseDTO.class);
+
+        // 받은 ModelResponseDTO를 통한 로직 실행
+        processModelResponse(responseDTO, meetingId, domain);
     }
 
     //테스트용
@@ -93,22 +139,21 @@ public class ModelService {
                 meetingFileService.create(meetingId, FileType.IMAGE, imageUrl, fileName);
             }
 
-            //보고서
+            // 보고서
             String reportUrl = s3FileService.processAndUploadMarkdownFile(modelServerBucketName, response.report(),
                     "report", meetingId, imageUrlMap);
             String reportName = meetingId + "_" + response.report().substring(response.report().lastIndexOf("/") + 1);
             meetingFileService.create(meetingId, FileType.REPORT, reportUrl, reportName);
 
-            //원문
+            // 원문
             String sttUrl = s3FileService.transferFileFromOtherS3(modelServerBucketName, response.stt(),
                     "stt", meetingId);
             String sttFileName = meetingId + "_" + response.stt().substring(response.stt().lastIndexOf("/") + 1);
             meetingFileService.create(meetingId, FileType.STT_RAW, sttUrl, sttFileName);
 
-        } catch (Exception e){
+        } catch (Exception e) {
             log.error("파일 다운 중 에러 발생: {}", e.getMessage());
         }
-
     }
 
 
@@ -141,9 +186,9 @@ public class ModelService {
 
             mp3File = new File(tempWebmFile.getAbsolutePath().replace(".webm", ".mp3"));
 
-            // 추후에 해당 저장 경로를 인스턴스 내 ffmpeg 라이브러리 설치 경로로 변경
+            // ffmpeg 실행 경로 설정 필요
             ProcessBuilder processBuilder = new ProcessBuilder(
-                    "/opt/homebrew/bin/ffmpeg",
+                    "/opt/homebrew/bin/ffmpeg", // 실제 ffmpeg 경로로 변경 필요
                     "-i", tempWebmFile.getAbsolutePath(),
                     "-codec:a", "libmp3lame",
                     "-b:a", "128k",

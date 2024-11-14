@@ -76,6 +76,9 @@ public class ModelService {
             ModelRequestDTO modelRequestDTO = new ModelRequestDTO(domain, mp3FileUrl, meetingId);
             log.info("modelRequestDTO: {}", modelRequestDTO);
 
+            // 모델 호출이 끝난 후 MP3 파일 스트림 닫기
+            closeMp3File(mp3File, meetingId);
+
             invokeModelServer(modelRequestDTO, meetingId, domain);
 
             return ResponseEntity.accepted().body("추론 요청이 접수되었습니다.");
@@ -103,16 +106,10 @@ public class ModelService {
                 .withBody(ByteBuffer.wrap(payload.getBytes(StandardCharsets.UTF_8)));
 
         // SageMaker 엔드포인트 호출
-        InvokeEndpointResult invokeEndpointResult = sagemakerRuntimeClient.invokeEndpoint(invokeEndpointRequest);
+        sagemakerRuntimeClient.invokeEndpoint(invokeEndpointRequest);
 
-        // 응답을 문자열로 변환
-        String responseBody = StandardCharsets.UTF_8.decode(invokeEndpointResult.getBody()).toString();
-
-        // 응답 JSON을 ModelResponseDTO로 변환
-        ModelResponseDTO responseDTO = objectMapper.readValue(responseBody, ModelResponseDTO.class);
-
-        // 받은 ModelResponseDTO를 통한 로직 실행
-        processModelResponse(responseDTO, meetingId);
+        //요청을 보낸 뒤 해당 회의는 pending 상태로 변환
+        meetingService.setMeetingPendingStatus(meetingId);
     }
 
     //테스트용

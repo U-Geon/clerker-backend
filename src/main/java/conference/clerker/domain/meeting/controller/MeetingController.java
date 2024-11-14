@@ -25,9 +25,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/meeting")
 public class MeetingController {
 
-    @Value("${baseUrl.front}")
-    private String frontUrl;
-
     private final MeetingService meetingService;
     private final OrganizationService organizationService;
     private final NotificationService notificationService;
@@ -63,10 +60,8 @@ public class MeetingController {
         Meeting meeting = meetingService.findById(meetingId);
 
         if (meeting.getIsEnded()) {
-            String redirectionUrl = frontUrl + "/project/summary/" + meetingId;
             return ResponseEntity.status(HttpStatus.FOUND)
-                    .location(URI.create(redirectionUrl))
-                    .build();
+                    .body(meetingService.redirectToMeetingDetailPage(meetingId));
         }
         return ResponseEntity.ok(meeting);
     }

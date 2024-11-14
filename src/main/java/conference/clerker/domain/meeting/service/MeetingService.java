@@ -16,7 +16,9 @@ import conference.clerker.global.exception.CustomException;
 import conference.clerker.global.exception.ErrorCode;
 import conference.clerker.global.exception.domain.AuthException;
 import conference.clerker.global.exception.domain.MeetingException;
+import java.util.HashMap;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +30,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class MeetingService {
+
+    @Value("${baseUrl.front}")
+    private String frontUrl;
 
     private final MeetingRepository meetingRepository;
     private final ProjectRepository projectRepository;
@@ -60,6 +65,15 @@ public class MeetingService {
     public Meeting findById(Long id) {
         return meetingRepository.findById(id)
                 .orElseThrow(() -> new MeetingException(ErrorCode.MEETING_NOT_FOUND));
+    }
+
+    public Map<String, String> redirectToMeetingDetailPage(Long meetingId) {
+        String redirectionUrl = frontUrl + "/project/summary/" + meetingId;
+
+        Map<String, String> body = new HashMap<>();
+        body.put("redirectUrl", redirectionUrl);
+
+        return body;
     }
 
     // 미팅 파일 목록 조회

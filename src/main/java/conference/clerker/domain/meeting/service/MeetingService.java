@@ -81,11 +81,12 @@ public class MeetingService {
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new RuntimeException("Meeting not found id: " + meetingId));
 
-        Map<FileType, List<MeetingFIleDTO>> filesByType = meetingFileRepository.findByMeetingId(meetingId).stream()
+        Map<FileType, MeetingFIleDTO> filesByType = meetingFileRepository.findByMeetingId(meetingId).stream()
                 .filter(file -> file.getFileType() != FileType.IMAGE)
-                .collect(Collectors.groupingBy(
+                .collect(Collectors.toMap(
                         MeetingFile::getFileType,
-                        Collectors.mapping(MeetingFIleDTO::new, Collectors.toList())
+                        MeetingFIleDTO::new,
+                        (existing, replacement) -> replacement // 충돌 발생 시, 최신 파일로 대체
                 ));
 
         return new MeetingResultDTO(

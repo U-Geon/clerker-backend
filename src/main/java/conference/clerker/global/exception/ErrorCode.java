@@ -24,6 +24,8 @@ public enum ErrorCode {
 
     MEETING_NOT_FOUND(HttpStatus.NOT_FOUND, "MEETING-001", "회의를 찾을 수 없습니다"),
 
+    MEETING_NOT_END(HttpStatus.FORBIDDEN, "MEETING-002", "종료된 회의만 접근 가능합니다."),
+
     ORGANIZATION_NOT_FOUND(HttpStatus.NOT_FOUND, "ORGANIZATION-001", "소속 멤버를 찾을 수 없습니다."),
     DUPLICATED_ORGANIZATION(HttpStatus.BAD_REQUEST, "ORGANIZATION-002", "이미 가입된 멤버입니다."),
     FORBIDDEN_MEMBER(HttpStatus.FORBIDDEN, "ORGANIZATION-003", "해당 권한으로는 접근이 불가능합니다.")

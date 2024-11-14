@@ -8,6 +8,8 @@ import com.amazonaws.services.sagemakerruntime.model.InvokeEndpointRequest;
 import com.amazonaws.services.sagemakerruntime.model.InvokeEndpointResult;
 import com.amazonaws.util.IOUtils;
 import conference.clerker.domain.meeting.schema.FileType;
+import conference.clerker.domain.meeting.schema.Meeting;
+import conference.clerker.domain.meeting.schema.Status;
 import conference.clerker.domain.meeting.service.MeetingFileService;
 import conference.clerker.domain.meeting.service.MeetingService;
 import conference.clerker.domain.model.dto.request.ModelRequestDTO;
@@ -133,16 +135,15 @@ public class ModelService {
     //테스트용
     @Transactional
     public void testProcessModelResponse(ModelResponseDTO response, Long meetingId, String domain) {
-        meetingService.endMeeting(meetingId, domain);
+        meetingService.endMeeting(Status.COMPLETE, meetingId);
         processModelResponse(response, meetingId, domain);
     }
 
     // 받은 ModelResponseDTO를 통한 로직 실행.
-    public void processModelResponse(ModelResponseDTO response, Long meetingId, String domain) {
-        log.info("processModelResponse 실행");
-
-        // meeting 엔티티 컬럼 변경 (회의 종료)
-        meetingService.endMeeting(meetingId, domain);
+    private void processModelResponse(ModelResponseDTO response, Long meetingId, String domain) {
+        // meeting 엔티티 컬럼 변경 (모델링 시작)
+        Meeting meeting = meetingService.endMeeting(Status.PENDING, meetingId);
+        meeting.setDomain(domain);
 
         // 여기서 받은 url들을 토대로 파일을 s3에 저장한 뒤 DB에 버킷 경로 저장
         try {
@@ -171,6 +172,26 @@ public class ModelService {
             log.error("파일 다운 중 에러 발생: {}", e.getMessage());
         }
     }
+
+
+    // webm to mp3 이후 s3에 저장하는 로직 테스트
+//    public String test1(MultipartFile webmFile) {
+//        if (webmFile == null || webmFile.isEmpty()) {
+//            log.error("업로드된 파일이 없습니다.");
+//            throw new IllegalArgumentException("업로드된 파일이 없습니다.");
+//        }
+//
+//        try {
+//            MultipartFile mp3File = convertWebmToMp3(webmFile);
+//            return s3FileService.uploadFile("mp3File", mp3File.getOriginalFilename(), mp3File);
+//        } catch (IOException e) {
+//            log.error("파일 변환 중 IO 에러 발생: {}", e.getMessage());
+//            throw new RuntimeException("파일 변환 중 IO 에러 발생: " + e.getMessage(), e);
+//        } catch (Exception e) {
+//            log.error("예기치 않은 에러 발생: {}", e.getMessage());
+//            throw new RuntimeException("예기치 않은 에러 발생: " + e.getMessage(), e);
+//        }
+//    }
 
     private MultipartFile convertWebmToMp3(MultipartFile webmFile) {
         File tempWebmFile = null;
@@ -209,6 +230,7 @@ public class ModelService {
         }
     }
 
+    // mp3File 타입을 File에서 MultipartFile로 변경하는 로직.
     private MultipartFile createMultipartFile(File mp3File, byte[] mp3Bytes) {
         return new MultipartFile() {
             @Override
@@ -255,6 +277,7 @@ public class ModelService {
         };
     }
 
+    // mp3로 변환하면서 생기는 임시 파일 삭제
     private void cleanUpTempFiles(File tempWebmFile, File mp3File) {
         if (tempWebmFile != null && tempWebmFile.exists() && !tempWebmFile.delete()) {
             log.error("임시 webm 파일 삭제 실패: {}", tempWebmFile.getAbsolutePath());
@@ -264,9 +287,12 @@ public class ModelService {
         }
     }
 
-    public void closeMp3File(MultipartFile mp3File) {
+    // s3 업로드 후 로컬 환경에 설치되는 mp3 파일 삭제
+    private void closeMp3File(MultipartFile mp3File, Long meetingId) {
+        meetingService.endMeeting(Status.COMPLETE, meetingId);
         try {
             if (mp3File != null) {
+                mp3File.getInputStream();
                 mp3File.getInputStream().close();
             }
         } catch (IOException e) {

@@ -82,7 +82,7 @@ public class ModelService {
         // 여기서 받은 url들을 토대로 파일을 s3에 저장한 뒤 DB에 버킷 경로 저장
         try {
             // zip 파일 압축 해제 후 이미지 업로드
-            Map<String, String> imageUrlMap = s3FileService.transferZipContentFromOtherS3(modelServerBucketName, response.images(), "images", meetingId);
+            Map<String, String> imageUrlMap = s3FileService.transferZipContentFromOtherS3(modelServerBucketName, response.diagram_image(), "images", meetingId);
             // 업로드된 이미지의 파일명과 URL을 MeetingFile에 저장
             for (Map.Entry<String, String> entry : imageUrlMap.entrySet()) {
                 String fileName = entry.getKey();      // 이미지 파일명

@@ -26,7 +26,7 @@ public class ModelController {
             summary = "영상 녹화 종료 시 API 요청",
             description = ".webm 파일을 mp3로 변환 후 S3에 저장. 모델에 S3 url과 주제 도메인 전송"
     )
-    public Mono<ResponseEntity<ModelResponseDTO>> endRecording(
+    public ResponseEntity<String> endRecording(
             @Parameter(description = "주제 도메인", required = true, example = "\"Front-end\"")
             @Valid @RequestPart("domain") String domain,
 
@@ -36,9 +36,13 @@ public class ModelController {
             @Parameter(description = "meeting ID", required = true)
             @Valid @RequestParam(value = "meetingId") Long meetingId
     ) {
-        return modelService.sendToModelServer(domain, webmFile, meetingId)
-                .map(ResponseEntity::ok)
-                .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));
+        try {
+            // 서비스 메서드를 호출하여 비동기적으로 모델 서버 요청을 처리하고, 반환값을 그대로 사용
+            return modelService.sendToModelServer(domain, webmFile, meetingId);
+        } catch (Exception e) {
+            // 에러 발생 시 400 Bad Request 응답 반환
+            return ResponseEntity.badRequest().body("요청 처리 중 오류가 발생했습니다: " + e.getMessage());
+        }
     }
 
     @PostMapping("/testProcessResponse")

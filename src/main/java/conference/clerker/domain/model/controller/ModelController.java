@@ -43,15 +43,18 @@ public class ModelController {
 
     @PostMapping("/testProcessResponse")
     @Operation(
-            summary = "processModelResponse 메서드 테스트",
-            description = "테스트 데이터를 사용하여 processModelResponse 메서드를 실행합니다."
+            summary = "모델링 결과 이후의 로직 테스트",
+            description = "1. 받은 raw text + md file + image.zip 을 통해 zip 파일 압축 해제 후 image들을 각각 s3에 저장\n\n"
+                    + "2. md 파일에 해당 image S3 url 삽입\n\n"
+                    + "3. 클라이언트에게 md file + raw text 반환"
     )
     public ResponseEntity<String> testProcessResponse(
-            @RequestParam(name = "meetingId") Long meetingId, // 파라미터 이름 명시
+            @RequestParam("meetingId") Long meetingId, // 파라미터 이름 명시
+            @RequestParam("domain") String domain,
             @RequestBody ModelResponseDTO response
     ) {
         try {
-            modelService.testProcessModelResponse(response, meetingId);
+            modelService.testProcessModelResponse(response, meetingId, domain);
             return ResponseEntity.ok("processModelResponse 메서드가 성공적으로 실행되었습니다.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

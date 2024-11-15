@@ -40,6 +40,7 @@ public class ModelService {
     private final MeetingFileService meetingFileService;
     private final S3FileService s3FileService;
     private final MeetingService meetingService;
+    private final AsyncModelService asyncModelService;  // 비동기 서비스 주입
 
     // AWS 자격 증명을 설정하기 위해 필요한 값 주입
     @Value("${other.aws.access-key}")
@@ -85,7 +86,8 @@ public class ModelService {
             // 모델 호출이 끝난 후 MP3 파일 스트림 닫기
             closeMp3File(mp3File, meetingId);
 
-            invokeModelServer(modelRequestDTO, meetingId, domain);
+            // 비동기 호출로 SageMaker 모델 호출 및 파일 스트림 닫기
+            asyncModelService.invokeModelServerAsync(modelRequestDTO, mp3File, meetingId, domain);
 
             return ResponseEntity.accepted().body("추론 요청이 접수되었습니다.");
 
@@ -128,9 +130,6 @@ public class ModelService {
 
     // 받은 ModelResponseDTO를 통한 로직 실행.
     private void processModelResponse(ModelResponseDTO response, Long meetingId) {
-        // meeting 엔티티 컬럼 변경 (모델링 시작)
-        meetingService.endMeeting(Status.PENDING, meetingId);
-
         // 여기서 받은 url들을 토대로 파일을 s3에 저장한 뒤 DB에 버킷 경로 저장
         try {
             // zip 파일 압축 해제 후 이미지 업로드
@@ -191,7 +190,7 @@ public class ModelService {
 
             // ffmpeg 실행 경로 설정 필요
             ProcessBuilder processBuilder = new ProcessBuilder(
-                    "/usr/bin/ffmpeg", // 실제 ffmpeg 경로로 변경 필요
+                    "/opt/homebrew/bin/ffmpeg", // 실제 ffmpeg 경로로 변경 필요
                     "-i", tempWebmFile.getAbsolutePath(),
                     "-codec:a", "libmp3lame",
                     "-b:a", "128k",

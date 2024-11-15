@@ -53,15 +53,10 @@ public class AsyncModelService {
                     .withContentType("application/json")
                     .withBody(ByteBuffer.wrap(payload.getBytes(StandardCharsets.UTF_8)));
 
-            InvokeEndpointResult invokeEndpointResult = sagemakerRuntimeClient.invokeEndpoint(invokeEndpointRequest);
+            sagemakerRuntimeClient.invokeEndpoint(invokeEndpointRequest);
 
-
-            String responseBody = StandardCharsets.UTF_8.decode(invokeEndpointResult.getBody()).toString();
-            log.info("SageMaker 응답: {}", responseBody);
-            ModelResponseDTO responseDTO = objectMapper.readValue(responseBody, ModelResponseDTO.class);
-
-            processModelResponse(responseDTO, meetingId);
-
+            //요청을 보낸 뒤 해당 회의는 pending 상태로 변환
+            meetingService.setMeetingPendingStatus(meetingId);
         } catch (Exception e) {
             log.error("모델 서버 호출 중 오류 발생: {}", e.getMessage(), e);
         } finally {

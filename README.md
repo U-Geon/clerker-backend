@@ -13,19 +13,20 @@ Clerker [AI를 활용한 회의 지원 솔루션 플랫폼]
 - 회의에 참여하지 못한 팀원들도 해당 회의의 전체적인 내용을 확인할 수 있게 한다.
 
 ## 📍 기술 스택
-- java : 17
-- Spring boot : 3.3.2
-- build : Gradle
-- DB : MySQL
-- Cloud
-    - AWS EC2
-    - AWS S3
-    - Docker
-- CI / CD : GitHub Actions, self-hosted Runner
-- Collaboration : Notion, Swagger-ui
+- **Language** : Java 17 (OpenJDK 17)
+- **Web Server** : Apache Tomcat 8.0, AWS EC2, ubuntu
+- **Framework** : Spring Boot 3.x, Spring Security 6.x, Spring WebFlux
+- **DB** : MySQL 17, Redis
+- **CI/CD** : Docker, GitHub Actions
+- **인증, 인가** : JWT, OAuth2
+- **IDE** : Intellij IDEA 2024
+- **Tools**
+    - **Collaboration** : Notion
+    - **Version Control** : Git
+    - **API Docs.** : Swagger-UI
 
 ## 🗓️ 개발 기간
-2024.07 ~ 2024.11
+2024.06 ~ 2024.11
 
 ## 👨🏻‍💻 팀원
 - [20203119 이정욱](https://github.com/ukly)
